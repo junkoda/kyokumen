@@ -1,0 +1,26 @@
+
+svg.kyokumen {
+    font-family: sans-serif;
+    margin: 100px;
+    padding: 30px;
+    width: 350px;
+}
+
+.ban {
+    stroke-width: 3;
+    stroke: #000;
+    fill: #FFF;
+}
+
+.sen {
+    stroke-width: 1;
+    stroke: #000;
+}
+
+.koma, .num {
+    font-size: 20px;
+}
+
+.sente {
+    transform: rotate(180deg);
+}
