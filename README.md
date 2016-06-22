@@ -1,6 +1,6 @@
-kyokumen.js
+局面.js
 ===========
-ウェブで棋譜を語るための JavaScript ライブラリ
+ウェブで将棋の棋譜を語るための JavaScript ライブラリ
 
 ## できること
 
@@ -22,8 +22,6 @@ kyokumen.js
 ```
 
 board は変更したい図の `id` です。
-aaa
-
 
 ### 例
 
