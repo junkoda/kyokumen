@@ -43,6 +43,31 @@ function setupMoves() {
   }
 }
 
+/**
+ *Variables:
+ * *kyokumen* is an <svg> tag with class='kyokumen' and an sfen attribute
+ * e.g.: <svg id='zu1' class='kyokumen'
+ *         sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
+ *        </svg>
+ * *width*is the width of the svg element, which is the length of the board in pixcels
+ */
+
+function drawKyokumen(kyokumen) {
+  var width = getWidth(kyokumen);
+  var margin = getMargin(kyokumen);
+  kyokumen.style.width = String(width + margin[1] + margin[3]) + 'px';
+  kyokumen.style.height = String(width + margin[0] + margin[2]) + 'px';
+  kyokumen.style.margin = '0'
+
+  // Save original value of width and margin as w and mar respectively
+  kyokumen.setAttribute("w",  width);
+  kyokumen.setAttribute("mar",  margin);
+
+  drawBan(kyokumen, width, margin);        // Box and lines
+  drawNumbersCol(kyokumen, width, margin); // Axis label ９、８、･･･、１
+  drawNumbersRow(kyokumen, width, margin); // Axis label 一、二、･･･、九
+  drawPieces(kyokumen, width, margin, null);
+}
 
 /**
  * Draw move
@@ -60,6 +85,8 @@ function drawMove() {
     console.log(this);
   }
 
+
+
   // Remove existing pieces
   clearKyokumen(kyokumen, 'koma');
   clearKyokumen(kyokumen, 'nari-goma');
@@ -67,8 +94,11 @@ function drawMove() {
   clearKyokumen(kyokumen, 'gote');
 
   var width = getWidth(kyokumen);
+  var margin = getMargin(kyokumen);
+    kyokumen.style.width = width + margin[1] + margin[3];
+  kyokumen.style.height = width + margin[0] + margin[2];
 
-  drawPieces(kyokumen, width, sfen);
+  drawPieces(kyokumen, width, margin, sfen);
 }
 
 /**
@@ -85,34 +115,18 @@ function clearKyokumen(kyokumen, cls) {
   }
 }
 
-/**
- *Variables:
- * *kyokumen* is an <svg> tag with class='kyokumen' and an sfen attribute
- * e.g.: <svg id='zu1' class='kyokumen'
- *         sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
- *        </svg>
- * *width*is the width of the svg element, which is the length of the board in pixcels
- */
 
-function drawKyokumen(kyokumen) {
-  var width = getWidth(kyokumen);
-
-  drawBan(kyokumen, width);        // Box and lines
-  drawNumbersCol(kyokumen, width); // Axis label ９、８、･･･、１
-  drawNumbersRow(kyokumen, width); // Axis label 一、二、･･･、九
-  drawPieces(kyokumen, width, null);
-}
 
 /**
  * Draw a square and lines for shogi-ban
  */
-function drawBan(kyokumen, width) {
-  kyokumen.setAttribute('height', width);
+function drawBan(kyokumen, width, margin) {
+  //kyokumen.setAttribute('height', width);
 
   var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('class', 'ban');
-  rect.setAttribute('x', '0');
-  rect.setAttribute('y', '0');
+  rect.setAttribute('x', margin[1]);
+  rect.setAttribute('y', margin[0]);
   rect.setAttribute('width', width);
   rect.setAttribute('height', width);
   kyokumen.appendChild(rect);
@@ -123,21 +137,21 @@ function drawBan(kyokumen, width) {
   for (var i = 1; i < nrow; i++) {
     var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('class', 'sen');
-    line.setAttribute('x1', '0');
-    line.setAttribute('x2', width);
-    line.setAttribute('y1', w * i);
-    line.setAttribute('y2', w * i);
+    line.setAttribute('x1', margin[1]);
+    line.setAttribute('x2', margin[1] + width);
+    line.setAttribute('y1', margin[0] + w * i);
+    line.setAttribute('y2', margin[0] + w * i);
     kyokumen.appendChild(line);
   }
 
   // 縦線
   for(var i=1; i<nrow; i++) {
     var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', w * i);
-    line.setAttribute('x2', w * i);
+    line.setAttribute('x1', margin[1] + w * i);
+    line.setAttribute('x2', margin[1] + w * i);
     line.setAttribute('class', 'sen');
-    line.setAttribute('y1', '0');
-    line.setAttribute('y2', width);
+    line.setAttribute('y1', margin[0]);
+    line.setAttribute('y2', margin[0] + width);
     kyokumen.appendChild(line);
   }
 }
@@ -145,15 +159,15 @@ function drawBan(kyokumen, width) {
 /**
  *  Draw 9 ... 1 on top magin
  */
-function drawNumbersCol(kyokumen, width) {
+function drawNumbersCol(kyokumen, width, margin) {
   var w = width / nrow;
   label = ['９', '８', '７', '６', '５', '４', '３', '２', '１'];
 
   for(var i=0; i<nrow; i++) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
-    num.setAttribute('x', w * (i + 0.5));
-    num.setAttribute('y', -w * axisLine - 2);
+    num.setAttribute('x', margin[1] + w * (i + 0.5));
+    num.setAttribute('y', margin[0] + -w * axisLine - 2);
 
     num.setAttribute('text-anchor', 'middle');
     num.setAttribute('dominant-baseline', 'bottom');
@@ -166,14 +180,14 @@ function drawNumbersCol(kyokumen, width) {
 /**
  *  Draw 一、二、･･･、九 on left margin
  */
-function drawNumbersRow(kyokumen, width) {
+function drawNumbersRow(kyokumen, width, margin) {
   var w = width / nrow;
 
   for(var i = 0; i < nrow; i++) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
-    num.setAttribute('x', width + w * axisLine + 2);
-    num.setAttribute('y', w * (i + 0.5));
+    num.setAttribute('x', margin[1] + width + w * axisLine + 2);
+    num.setAttribute('y', margin[0] + w * (i + 0.5));
 
     num.setAttribute('text-anchor', 'left');
     num.setAttribute('dominant-baseline', 'middle') ;
@@ -186,7 +200,7 @@ function drawNumbersRow(kyokumen, width) {
 /**
  * Parse sfen string and draw pieces
  */
-function drawPieces(kyokumen, width, sfen) {
+function drawPieces(kyokumen, width, margin, sfen) {
   // e.g. sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
   // for example for initial
   if (!sfen)
@@ -218,15 +232,15 @@ function drawPieces(kyokumen, width, sfen) {
       break;
     }
     else {
-      drawPiece(kyokumen, w, ix, iy, p);
+      drawPiece(kyokumen, margin, w, ix, iy, p);
       ix++;
     }
   }
 
   i = skipTeban(sfen, i);
 
-  i = DrawSente(kyokumen, width, sfen, i);
-  i = DrawGote(kyokumen, width, sfen, i);
+  i = DrawSente(kyokumen, width, margin, sfen, i);
+  i = DrawGote(kyokumen, width, margin, sfen, i);
 }
 
 /**
@@ -237,12 +251,12 @@ function drawPieces(kyokumen, width, sfen) {
  *       iy: 0...9, row index
  *       p:  sfen character 'p', 'P', ..., or promoted '+p', '+P', .. 
  */
-function drawPiece(kyokumen, w, ix, iy, p) {
+function drawPiece(kyokumen, margin, w, ix, iy, p) {
   var pieceText = Piece[p.toLowerCase()];
 
   if (pieceText) {
-    var x = w * (ix + 0.5);
-    var y = w * (iy + 0.5);
+    var x = margin[1] + w * (ix + 0.5);
+    var y = margin[0] + w * (iy + 0.5);
     var piece = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 
     if (p.charAt(0) == '+') {
@@ -252,7 +266,8 @@ function drawPiece(kyokumen, w, ix, iy, p) {
       piece.setAttribute('class', 'koma');
     }
 
-    piece.setAttribute('x', x - 2);
+    //piece.setAttribute('x', x - 2);
+    piece.setAttribute('x', x);
     piece.setAttribute('y', y);
 
     if (isGote(p)) {
@@ -276,7 +291,7 @@ function drawPiece(kyokumen, w, ix, iy, p) {
     }
 
     piece.setAttribute('text-anchor', 'middle');
-    piece.setAttribute('dominant-baseline', 'middle');
+    piece.setAttribute('dominant-baseline', 'central');
     var text = document.createTextNode(pieceText);
 
     piece.appendChild(text);
@@ -311,7 +326,6 @@ function skipTeban(sfen, i) {
     if (p == ' ')
       i++;
     else if (p == 'b' || p == 'w') {
-      console.log('Teban is ' + p);
       i++;
     }
     else
@@ -323,7 +337,7 @@ function skipTeban(sfen, i) {
 /**
  * Draw <svg sente='☗先手'> atrribute with Sente's pieces in hand.
  */
-function DrawSente(kyokumen, width, sfen, i) {
+function DrawSente(kyokumen, width, margin, sfen, i) {
   var n = sfen.length;
   var sente = kyokumen.getAttribute('sente');
   if (!sente)
@@ -348,9 +362,9 @@ function DrawSente(kyokumen, width, sfen, i) {
   
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'sente');
-  label.setAttribute('x', (1 + 1.2 / nrow) * width + 4);
-  label.setAttribute('y', 0);
-  label.setAttribute('dominant-baseline', 'text-after-edge');
+  label.setAttribute('x', margin[1] + (1 + 1.5 / nrow) * width + 4);
+  label.setAttribute('y', margin[0]);
+  label.setAttribute('dominant-baseline', 'central');
   var text = document.createTextNode(sente);
   label.appendChild(text);
   kyokumen.appendChild(label);
@@ -361,7 +375,7 @@ function DrawSente(kyokumen, width, sfen, i) {
 /**
  * Draw <svg gote='☖後手'> attribute with Gote's pieces in hand.
  */
-function DrawGote(kyokumen, width, sfen, i) {
+function DrawGote(kyokumen, width, margin, sfen, i) {
   var n = sfen.length;
   var gote = kyokumen.getAttribute('gote');
   if (!gote)
@@ -385,8 +399,8 @@ function DrawGote(kyokumen, width, sfen, i) {
   
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'gote');
-  label.setAttribute('x', -0.2 * width / nrow);
-  label.setAttribute('y', 0);
+  label.setAttribute('x', margin[1] - 0.4 * width / nrow);
+  label.setAttribute('y', margin[0]);
   label.setAttribute('dominant-baseline', 'text-before-edge');
   var text = document.createTextNode(gote);
   label.appendChild(text);
@@ -396,6 +410,11 @@ function DrawGote(kyokumen, width, sfen, i) {
 }
 
 function getWidth(kyokumen) {
+  var owidth = kyokumen.getAttribute("w");
+  if(owidth) {
+    return Number(owidth);
+  }
+
   var str_width = document.defaultView.getComputedStyle(kyokumen, null).width;
   var width = parseFloat(str_width);
 
@@ -405,6 +424,47 @@ function getWidth(kyokumen) {
   }
 
   return width;
+}
+
+function getMargin(kyokumen) {
+  /**
+   *  top-bottom left-right
+   *  top right-left bottom
+   *  top right botton left
+   */
+
+  var margin = [];
+
+  var omargin = kyokumen.getAttribute("mar");
+  if (omargin) {
+    return omargin.split(',').map(Number);
+  }
+
+  var sm = document.defaultView.getComputedStyle(kyokumen, null).margin
+
+  var n = sm.length;
+
+
+  if (n == 1) {
+    m = parseFloat(sm[0]);
+    margin = [m, m, m, m];
+  }
+  else if (n == 2) {
+    t = parseFloat(sm[0]);
+    l = parseFloat(sm[1]);
+    margin = [t, l, t, l];
+  }
+  else if (n == 3) {
+    margin = [parseFloat(sm[0]), parseFloat(sm[1]), parseFloat(sm[2]), parseFloat(sm[1])];
+  }
+  else if (n == 4) {
+    margin = [parseFloat(sm[0]), parseFloat(sm[1]), parseFloat(sm[2]), parseFloat(sm[3])];
+  }
+  else {
+    margin = [30, 60, 10, 60];
+  }
+
+  return margin;
 }
 
 function getBoard(o) {
