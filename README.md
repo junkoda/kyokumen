@@ -1,4 +1,7 @@
 kyokumen.js
 ===========
-A JavaScript library for shogi documents
+ウェブで棋譜を語るための JavaScript ライブラリ
+
+## できること
+
 

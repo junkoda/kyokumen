@@ -1,33 +1,92 @@
 /**
   * kyokumen.js: A library for shogi documents on the web
-  * Jun Koda (2016)
-  * https://github.com/junkoda/kyokumen
+  * Author:      Jun Koda (2016)
+  * Website:     https://github.com/junkoda/kyokumen
 */  
 
+window.addEventListener("load", eventWindowLoaded, false);
 
 const axisLine = 0.2
 
 const nrow = 9;
 const Piece = { l:"香", n:"桂", s:"銀", g:"金", k:"玉", r:"飛", b:"角", p:"歩", "+l":"成香", "+n":"成桂", "+s":"成銀", "+r":"龍", "+b":"馬", "+p":"と"}
 const numKanji = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八"];
-window.addEventListener("load", eventWindowLoaded, false);
 const SENTE = "☗"
 const GOTE  = "☖"
 
 function eventWindowLoaded() {
   drawKyokumens();
+  setupMoves();
 }
 
 /**
  * Find all tags with class="kyokumen" and draw the kyokumens
  */
 function drawKyokumens() {
-  kyokumens = document.getElementsByClassName("kyokumen");
+  var kyokumens = document.getElementsByClassName("kyokumen");
 
   var n = kyokumens.length
   for(var i=0; i<n; i++) {
     console.log(kyokumens[i]);
+    kyokumens[i].addEventListener("click", drawMove , false);
     drawKyokumen(kyokumens[i]);
+  }
+}
+
+/**
+ * Find all tags with class="mv" and attach event listener drawMove
+ */
+function setupMoves() {
+  var moves = document.getElementsByClassName("mv");
+  var n = moves.length
+  for(var i=0; i<moves.length; i++) {
+    //console.log(moves[i]);
+    //moves[i].addEventListener("click", drawMove , false);
+    moves[i].addEventListener("mouseover", drawMove , false);
+  }
+}
+
+
+/**
+  * Draw move
+  */
+function drawMove() {
+  /**
+    * 'this' is a class="mv" tag width board="board id" and sfen
+    */
+  console.log('drawMove')
+  console.log(this)
+
+  var kyokumen = getBoard(this); if(!kyokumen) return;
+  var sfen = this.getAttribute("sfen");
+  if(!sfen) {
+    console.log("Error: unable to get sfen in move:");
+    console.log(this);
+  }
+
+  // Remove existing pieces
+  console.log(kyokumen)
+  clearKyokumen(kyokumen, "koma")
+  clearKyokumen(kyokumen, "nari-goma") 
+  clearKyokumen(kyokumen, "sente") 
+  clearKyokumen(kyokumen, "gote")
+
+  var width = getWidth(kyokumen);
+
+  drawPieces(kyokumen, width, sfen);
+}
+
+/**
+  * Remove class=koda child elements from kyokumen
+  * Args:
+  *     kyokumen: a DOM element
+  *     cls (string): class name "koma", "nari-goma", ...
+  */
+function clearKyokumen(kyokumen, cls) {
+  var komas = kyokumen.getElementsByClassName(cls);
+  while(komas.length > 0) {
+    kyokumen.removeChild(komas[0]);
+    komas = kyokumen.getElementsByClassName(cls);
   }
 }
 
@@ -41,18 +100,12 @@ function drawKyokumens() {
  */
 
 function drawKyokumen(kyokumen) {
-  var str_width = document.defaultView.getComputedStyle(kyokumen, null).width
-  var width = parseFloat(str_width)
-
-  if(!width) {
-    console.log("Error in width: " + str_width)
-    return
-  }
+  var width = getWidth(kyokumen)
 
   drawBan(kyokumen, width);        // Box and lines
   drawNumbersCol(kyokumen, width); // Axis label ９、８、･･･、１
   drawNumbersRow(kyokumen, width); // Axis label 一、二、･･･、九
-  drawPieces(kyokumen, width);
+  drawPieces(kyokumen, width, null);
 }
 
 /**
@@ -138,10 +191,14 @@ function drawNumbersRow(kyokumen, width) {
 /**
   * Parse sfen string and draw pieces
   */
-function drawPieces(kyokumen, width) {
-  // sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b"> for example for initial 
+function drawPieces(kyokumen, width, sfen) {
+  // e.g. sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b"> for example for initial 
+  console.log("drawPieces sfen")
+  console.log(sfen)
+  if(!sfen)
+    sfen = kyokumen.getAttribute("sfen");
+
   var w = width / nrow;
-  sfen = kyokumen.getAttribute("sfen");
   console.log(sfen);
   n = sfen.length;
   ix = 0;
@@ -177,13 +234,6 @@ function drawPieces(kyokumen, width) {
 
   i = DrawSente(kyokumen, width, sfen, i)
   i = DrawGote(kyokumen, width, sfen, i)
-
-  // Pieces in hand
-  /*
-  for(; i<n; i++) {
-    console.log(sfen.charAt(i));
-  }
-  */
 }
 
 /**
@@ -223,7 +273,6 @@ function drawPiece(kyokumen, w, ix, iy, p) {
       }
       transformation += "rotate(180)"
       transformation += "translate(" + String(-x) + " " + String(-y) + ") ";
-      //var transformation = "rotate(180 " + String(x) + " " + String(y) + ")";
 
       piece.setAttribute("transform", transformation);
     }
@@ -245,10 +294,6 @@ function drawPiece(kyokumen, w, ix, iy, p) {
   else {
     console.log("Error: unknown piece, " + p)
   }
-
-  /*num.appendChild(text);
-  kyokumen.appendChild(num);
-  */
 }
 
 /**
@@ -258,10 +303,6 @@ function drawPiece(kyokumen, w, ix, iy, p) {
   */
 function isGote(character) {
   return (character == character.toLowerCase())
-}
-
-function isSente(character) {
-  return (character == character.toUpperCase())
 }
 
 /**
@@ -288,7 +329,9 @@ function skipTeban(sfen, i) {
   return i;
 }
 
-
+/**
+  * Draw <svg sente="☗先手"> atrribute with Sente's pieces in hand.
+  */
 function DrawSente(kyokumen, width, sfen, i) {
   var n = sfen.length;
   var sente = kyokumen.getAttribute("sente");
@@ -324,6 +367,9 @@ function DrawSente(kyokumen, width, sfen, i) {
   return i;
 }
 
+/**
+  * Draw <svg gote="☖後手"> attribute with Gote's pieces in hand.
+  */
 function DrawGote(kyokumen, width, sfen, i) {
   var n = sfen.length;
   var gote = kyokumen.getAttribute("gote");
@@ -356,5 +402,37 @@ function DrawGote(kyokumen, width, sfen, i) {
   kyokumen.appendChild(label);
 
   return i;
+}
+
+function getWidth(kyokumen) {
+  var str_width = document.defaultView.getComputedStyle(kyokumen, null).width
+  var width = parseFloat(str_width)
+
+  if(!width) {
+    console.log("Error in width: " + str_width)
+    return undefined
+  }
+
+  return width
+}
+
+function getBoard(o) {
+  if(o.tagName == "svg")
+    return o;
+
+  var boardid = o.getAttribute("board");
+  if(!boardid) {
+    console.log("Error: attribute board not defined")
+    console.log(o)
+    return
+  }
+  console.log(boardid)
+  var kyokumen = document.getElementById(boardid);
+  if(!kyokumen) {
+    console.log("Error: board not found with id= " + boardid)
+    return
+  }
+
+  return kyokumen
 }
 

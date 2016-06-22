@@ -3,20 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="kyokumen.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
   <title>局面.jsの使い方</title>
 </head>
 <body>
 <script src="kyokumen.js"></script>
+
+<main>
 <h1>局面.jsの使い方</h1>
 
-<svg id="zu1" class="kyokumen" sente="☗先手" gote="☖後手"
-     sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b">
-</svg>
-
-<svg id="zu2" class="kyokumen"
+<figure>
+<figcaption>図１</figcaption>
+<svg id="board1" class="kyokumen" sente="☗先手" gote="☖後手"
      sfen="8l/1l+R2P3/p2pBG1pp/kps1p4/Nn1P2G2/P1P1P2PP/1PS6/1KSG3+r1/LN2+p3L w Sbgn3p 124">
 </svg>
+</figure>
 
+<p><span class="mv" board="board1" sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b">初手</span>から<span class="mv" board="board1" sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b">☗７六歩</span>･･･</p>
+<p>（棋譜にカーソルを合わせると局面図が変わります）</p>
+
+
+</main>
 
 </body>
 </html>
