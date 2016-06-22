@@ -169,7 +169,7 @@ function drawNumbersCol(kyokumen, width) {
 function drawNumbersRow(kyokumen, width) {
   var w = width / nrow;
 
-  for(var i=0; i<nrow; i++) {
+  for(var i = 0; i < nrow; i++) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
     num.setAttribute('x', width + w * axisLine + 2);
@@ -201,13 +201,13 @@ function drawPieces(kyokumen, width, sfen) {
   var i;
   for (i = 0; i < n; i++) {
     p = sfen.charAt(i);
-    if(p == '+') {
+    if (p == '+') {
       p = sfen.substring(i, i + 2);
       i++;
     }
 
     var number = Number(p);
-    if(p == '/') { // Next row
+    if (p == '/') { // Next row
       ix = 0;
       iy++;
     }
@@ -306,11 +306,11 @@ function isGote(character) {
  */
 function skipTeban(sfen, i) {
   var n = sfen.length;
-  while (i<n) {
+  while (i < n) {
     p = sfen.charAt(i);
-    if(p == ' ')
+    if (p == ' ')
       i++;
-    else if(p == 'b' || p == 'w') {
+    else if (p == 'b' || p == 'w') {
       console.log('Teban is ' + p);
       i++;
     }
@@ -326,18 +326,18 @@ function skipTeban(sfen, i) {
 function DrawSente(kyokumen, width, sfen, i) {
   var n = sfen.length;
   var sente = kyokumen.getAttribute('sente');
-  if(!sente)
+  if (!sente)
     sente = SENTE;
   sente += ' ';
 
   while (i < n) {
     var p = sfen.charAt(i);
-    number = parseInt(sfen.substring(i,n));
-    if(number) {
+    number = parseInt(sfen.substring(i, n));
+    if (number) {
       sente += numKanji[number - 1];
       i += String(number).length;
     }
-    else if(isGote(p)) {
+    else if (isGote(p)) {
       break;
     }
     else {
@@ -348,7 +348,7 @@ function DrawSente(kyokumen, width, sfen, i) {
   
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'sente');
-  label.setAttribute('x', (1 + 1.2/nrow)*width + 4);
+  label.setAttribute('x', (1 + 1.2 / nrow) * width + 4);
   label.setAttribute('y', 0);
   label.setAttribute('dominant-baseline', 'text-after-edge');
   var text = document.createTextNode(sente);
@@ -364,15 +364,15 @@ function DrawSente(kyokumen, width, sfen, i) {
 function DrawGote(kyokumen, width, sfen, i) {
   var n = sfen.length;
   var gote = kyokumen.getAttribute('gote');
-  if(!gote)
+  if (!gote)
     gote = GOTE;
   gote += ' ';
 
-  while(i<n) {
+  while (i < n) {
     var p = sfen.charAt(i);
     if(p == ' ') break;
 
-    number = parseInt(sfen.substring(i,n));
+    number = parseInt(sfen.substring(i, n));
     if(number) {
       gote += numKanji[number - 1];
       i += String(number).length;
@@ -385,7 +385,7 @@ function DrawGote(kyokumen, width, sfen, i) {
   
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'gote');
-  label.setAttribute('x', -0.2*width/nrow);
+  label.setAttribute('x', -0.2 * width / nrow);
   label.setAttribute('y', 0);
   label.setAttribute('dominant-baseline', 'text-before-edge');
   var text = document.createTextNode(gote);
@@ -408,18 +408,18 @@ function getWidth(kyokumen) {
 }
 
 function getBoard(o) {
-  if(o.tagName == 'svg')
+  if (o.tagName == 'svg')
     return o;
 
   var boardid = o.getAttribute('board');
-  if(!boardid) {
+  if (!boardid) {
     console.log('Error: attribute board not defined');
     console.log(o);
     return;
   }
 
   var kyokumen = document.getElementById(boardid);
-  if(!kyokumen) {
+  if (!kyokumen) {
     console.log('Error: board not found with id= ' + boardid);
     return;
   }
