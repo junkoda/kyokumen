@@ -32,11 +32,11 @@ aaa
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/junkoda/kyokumen/master/kyokumen.js">
+  <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/junkoda/kyokumen/master/kyokumen.css">
   <title>例</title>
 </head>
 <body>
-<script src="kyokumen.js"></script>
+<script src="https://raw.githubusercontent.com/junkoda/kyokumen/master/kyokumen.js"></script>
 
 <svg id="board1" class="kyokumen" sente="☗先手" gote="☖後手"
      sfen="8l/1l+R2P3/p2pBG1pp/kps1p4/Nn1P2G2/P1P1P2PP/1PS6/1KSG3+r1/LN2+p3L w Sbgn3p 124">
