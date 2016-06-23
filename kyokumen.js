@@ -57,11 +57,11 @@ function drawKyokumen(kyokumen) {
   var margin = getMargin(kyokumen);
   kyokumen.style.width = String(width + margin[1] + margin[3]) + 'px';
   kyokumen.style.height = String(width + margin[0] + margin[2]) + 'px';
-  kyokumen.style.margin = '0'
+  kyokumen.style.padding = '0'
 
   // Save original value of width and margin as w and mar respectively
-  kyokumen.setAttribute("w",  width);
-  kyokumen.setAttribute("mar",  margin);
+  kyokumen.setAttribute("data-width",  width);
+  kyokumen.setAttribute("data-margin",  margin);
 
   drawBan(kyokumen, width, margin);        // Box and lines
   drawNumbersCol(kyokumen, width, margin); // Axis label ９、８、･･･、１
@@ -79,7 +79,7 @@ function drawMove() {
 
   var kyokumen = getBoard(this);
   if (!kyokumen) return;
-  var sfen = this.getAttribute('sfen');
+  var sfen = this.getAttribute('data-sfen');
   if (!sfen) {
     console.log('Error: unable to get sfen in move:');
     console.log(this);
@@ -204,7 +204,7 @@ function drawPieces(kyokumen, width, margin, sfen) {
   // e.g. sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
   // for example for initial
   if (!sfen)
-    sfen = kyokumen.getAttribute('sfen');
+    sfen = kyokumen.getAttribute('data-sfen'); // kyokumen.dataset.sfen not working in firefox
 
   var w = width / nrow;
   var n = sfen.length;
@@ -339,7 +339,7 @@ function skipTeban(sfen, i) {
  */
 function DrawSente(kyokumen, width, margin, sfen, i) {
   var n = sfen.length;
-  var sente = kyokumen.getAttribute('sente');
+  var sente = kyokumen.getAttribute('data-sente');
   if (!sente)
     sente = SENTE;
   sente += ' ';
@@ -377,7 +377,7 @@ function DrawSente(kyokumen, width, margin, sfen, i) {
  */
 function DrawGote(kyokumen, width, margin, sfen, i) {
   var n = sfen.length;
-  var gote = kyokumen.getAttribute('gote');
+  var gote = kyokumen.getAttribute('data-gote');
   if (!gote)
     gote = GOTE;
   gote += ' ';
@@ -410,7 +410,7 @@ function DrawGote(kyokumen, width, margin, sfen, i) {
 }
 
 function getWidth(kyokumen) {
-  var owidth = kyokumen.getAttribute("w");
+  var owidth = kyokumen.getAttribute("data-width");
   if(owidth) {
     return Number(owidth);
   }
@@ -435,12 +435,12 @@ function getMargin(kyokumen) {
 
   var margin = [];
 
-  var omargin = kyokumen.getAttribute("mar");
+  var omargin = kyokumen.getAttribute("data-margin");
   if (omargin) {
     return omargin.split(',').map(Number);
   }
 
-  var sm = document.defaultView.getComputedStyle(kyokumen, null).margin
+  var sm = document.defaultView.getComputedStyle(kyokumen, null).padding
 
   var n = sm.length;
 
@@ -471,7 +471,7 @@ function getBoard(o) {
   if (o.tagName == 'svg')
     return o;
 
-  var boardid = o.getAttribute('board');
+  var boardid = o.getAttribute('data-board');
   if (!boardid) {
     console.log('Error: attribute board not defined');
     console.log(o);
