@@ -1,0 +1,9 @@
+main {
+    margin: 0 auto;
+    width: 600px;
+}
+
+figcaption {
+    text-align: center;
+    width: 320px;
+}
