@@ -1,11 +1,14 @@
 局面.js
 ===========
 ウェブで将棋の棋譜を語るための JavaScript ライブラリ
+[https://junkoda.github.io/kyokumen/](https://junkoda.github.io/kyokumen/)
 
 ## できること
 
 - SFEN (Shogi Forsyth-Edwards Notation) を与えて、局面図を作る
 - 棋譜にマウスカーソルをあわせると局面図を更新する
+
+
 
 ## 使いかた
 
@@ -30,11 +33,11 @@ data-board は変更したい図の `id`。
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/junkoda/kyokumen/master/kyokumen.css">
+  <link rel="stylesheet" type="text/css" href="https://junkoda.github.io/kyokumen/0/kyokumen.css">
   <title>例</title>
 </head>
 <body>
-<script src="https://raw.githubusercontent.com/junkoda/kyokumen/master/kyokumen.js"></script>
+<script src="https://junkoda.github.io/kyokumen/0/kyokumen.js"></script>
 
 <svg id="board1" class="kyokumen" data-sente="☗先手" data-gote="☖後手"
      data-sfen="8l/1l+R2P3/p2pBG1pp/kps1p4/Nn1P2G2/P1P1P2PP/1PS6/1KSG3+r1/LN2+p3L w Sbgn3p 124">
