@@ -38,3 +38,7 @@ span:hover {
     fill: yellow;
 }
 
+#sfen {
+    width: 320px;
+}
+

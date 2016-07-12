@@ -24,6 +24,7 @@ function eventWindowLoaded() {
   initEditor();
   document.addEventListener('keypress', onKeyEvent);
   document.addEventListener('keydown', onKeyDown);
+  //window.addEventListener('keydown', onKeyDown);
 }
 
 function printMousePos(event) {
@@ -48,31 +49,116 @@ function printMousePos(event) {
 }
 
 function onKeyEvent(event) {
-  console.log(event.which);
-  console.log(event.which);
+  //console.log(event.which);
   //console.log(event.ctrlKey);
-
-  
-
-
-  //var cursor = document.getElementById("cursor");
-
+  /**
+   * Keyboard short cut with ctrl
+   */
   if(event.ctrlKey) {
     console.log('ctrl + ' + event.which);
     // Keyboard shortcut with ctrl
-    switch(event.witch) {
-      case 1: // 'ctrl + a'
+    switch(event.which) {
+      case 1: // 'ctrl + a' begining of line
         moveCursor(0, editor.iy);
         break;
-      case 5: // 'ctrl + e'
-        moveCursor(0, editor.iy);
+      case 2: // 'ctrl + b' back
+        moveCursor(editor.ix - 1, editor.iy);
         break;
-
-
+      case 4: // 'ctrl + b' back
+        editor.ban[nrow*editor.iy + editor.ix] = '';
+        refreshKyokumen();
+        break;
+      case 5: // 'ctrl + e' end of line
+        moveCursor(nrow - 1, editor.iy);
+        break;
+      case 6: // 'ctrl + f' forward
+        moveCursor(editor.ix + 1, editor.iy);
+        break;
+      case 14: // 'ctrl + n' down
+        moveCursor(editor.ix, editor.iy + 1);
+        break;
+      case 16: // 'ctrl + p' up
+        moveCursor(editor.ix, editor.iy - 1);
+        break;
+      case 8:
+        alert("backspace");
+        break; 
+      case 46:
+        return false;
+        //event.preventDefault();
+        alert("delete");
+        break;
     }
+  }
+  else if (event.which == 46 || event.which == 8) {
+    alert("delete");
+    return false;
 
   }
+  else {
+    key = pieceAscii[event.which];
+    if(!key) return;
 
+    //console.log(key);
+
+    index = nrow*editor.iy + editor.ix;
+    if(editor.ban[index] === '+' && key != '+') {
+      editor.ban[index] += key;
+    } 
+    else {
+      editor.ban[index] = key;
+    }
+
+
+    console.log(editor.ban[index]);
+    refreshKyokumen();
+    moveCursor(editor.ix + 1, editor.iy);
+ 
+  }
+
+}
+
+function refreshKyokumen() {
+  sfen = setSfenText(editor.ban);
+
+  clearKyokumen(editor.kyokumen, 'koma');
+  clearKyokumen(editor.kyokumen, 'nari-goma');
+  drawPieces(editor.kyokumen, editor.width, editor.margin, sfen);
+}
+
+function setSfenText(ban) {
+  var num = 0;
+  var text = '';
+  for(var iy=0; iy<nrow; iy++) {
+    for(var ix=0; ix<nrow; ix++) {
+      var index = nrow*iy + ix;
+      if(ban[index]) {
+        if(num > 0) {
+          text += num;
+          num = 0;
+        }
+        text += ban[index];
+      }
+      else {
+        num++;
+      }
+
+    }
+    if(num > 0) {
+      text += num;
+      num = 0;
+    }
+    if(iy < nrow - 1)
+      text += '/'
+  }
+
+  text += ' b - 1'
+
+  var sfenText = document.getElementById("sfen");
+  //sfenText.setAttribute('value', text);
+  sfenText.innerHTML = text;
+
+  return text;
 }
 
 /*
@@ -482,7 +568,7 @@ function DrawSente(kyokumen, width, margin, sfen, i) {
       sente += numKanji[number - 1];
       i += String(number).length;
     }
-    else if (isGote(p)) {
+    else if (p === '-' || isGote(p)) {
       break;
     }
     else {
@@ -515,7 +601,7 @@ function DrawGote(kyokumen, width, margin, sfen, i) {
 
   while (i < n) {
     var p = sfen.charAt(i);
-    if(p == ' ') break;
+    if(p === '-' || p === ' ') break;
 
     number = parseInt(sfen.substring(i, n));
     if(number) {
