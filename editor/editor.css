@@ -1,0 +1,40 @@
+
+svg.kyokumen {
+    width: 200px;
+    font-size: 18px;
+    display: block;
+    font-family: sans-serif;
+    padding: 30px 60px 10px 60px;
+}
+
+svg.kyokumen .ban {
+    stroke-width: 3;
+    stroke: #000;
+    fill: #FFF;
+}
+
+svg.kyokumen .sen {
+    stroke-width: 1;
+    stroke: #000;
+}
+
+svg.kyokumen .koma, .nari-goma, .sente, .gote {
+    writing-mode: tb; /* 縦書き */
+}
+
+svg.kyokumen .num {
+    font-size: 16px;
+}
+
+svg.kyokumen .nari-goma {
+    fill: #D00;
+}
+
+span:hover {
+    text-decoration: underline;
+}
+
+#cursor {
+    fill: yellow;
+}
+
