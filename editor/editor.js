@@ -13,7 +13,7 @@ const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p
 const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
 const SENTE = '☗';
 const GOTE = '☖';
-const pieceAscii = { 108:'l', 110:'n', 115:'s', 103:'g', 107:'k', 114:'r', 98:'b', 112:'p', 76:'L', 78:'N', 83:'S', 71:'G', 75:'K', 82:'R', 66:'B', 80:'P', 43:'+'};
+const pieceAscii = { 108:'l', 110:'n', 115:'s', 103:'g', 107:'k', 114:'r', 98:'b', 112:'p', 76:'L', 78:'N', 83:'S', 71:'G', 75:'K', 82:'R', 66:'B', 80:'P', 43:'+', 32:''};
 
 var editor = {ix:0, iy:0}
 
@@ -22,9 +22,13 @@ function eventWindowLoaded() {
   setupMoves();
 
   initEditor();
-  document.addEventListener('keypress', onKeyEvent);
-  document.addEventListener('keydown', onKeyDown);
+  //document.addEventListener('keypress', eventKeyPress);
+  //document.addEventListener('keydown',  eventKeyDown);
   //window.addEventListener('keydown', onKeyDown);
+
+  var kyokumen = document.getElementById("board");
+  kyokumen.addEventListener('keydown',  eventKeyDown);
+  kyokumen.addEventListener('keypress', eventKeyPress);
 }
 
 function printMousePos(event) {
@@ -45,11 +49,12 @@ function printMousePos(event) {
   //console.log(margin);
   var ix = Math.floor((event.clientX - rect.left - margin[3])/w);
   var iy = Math.floor((event.clientY - rect.top  - margin[0])/w);
-  console.log(ix + ' ' + iy)
+  //console.log(ix + ' ' + iy)
+  moveCursor(ix, iy);
 }
 
-function onKeyEvent(event) {
-  //console.log(event.which);
+function eventKeyPress(event) {
+  console.log('key press ' + event.which);
   //console.log(event.ctrlKey);
   /**
    * Keyboard short cut with ctrl
@@ -64,7 +69,7 @@ function onKeyEvent(event) {
       case 2: // 'ctrl + b' back
         moveCursor(editor.ix - 1, editor.iy);
         break;
-      case 4: // 'ctrl + b' back
+      case 4: // 'ctrl + d' delete
         editor.ban[nrow*editor.iy + editor.ix] = '';
         refreshKyokumen();
         break;
@@ -80,29 +85,22 @@ function onKeyEvent(event) {
       case 16: // 'ctrl + p' up
         moveCursor(editor.ix, editor.iy - 1);
         break;
-      case 8:
-        alert("backspace");
-        break; 
-      case 46:
-        return false;
-        //event.preventDefault();
-        alert("delete");
-        break;
     }
   }
-  else if (event.which == 46 || event.which == 8) {
-    alert("delete");
-    return false;
-
+  else if (event.shiftKey && event.which == 13) {
+    // shift + return
+    // create a figure (ToDO!!!)
+    alert('shift + return')
   }
   else {
     key = pieceAscii[event.which];
-    if(!key) return;
+    if(key === undefined) return;
 
     //console.log(key);
 
     index = nrow*editor.iy + editor.ix;
-    if(editor.ban[index] === '+' && key != '+') {
+    if(editor.ban[index] === '+' && key != '+' && key !== '') {
+      // Add piece alphabet after +
       editor.ban[index] += key;
     } 
     else {
@@ -164,23 +162,39 @@ function setSfenText(ban) {
 /*
  * Move Cursor when an arrow key pressed
  */
-function onKeyDown(event) {
+function eventKeyDown(event) {
   switch(event.which) {
     case 37:
+      // left arrow
       moveCursor(editor.ix - 1, editor.iy);
       break;
     case 38:
+      // up arrow
       moveCursor(editor.ix, editor.iy - 1);
       break;
     case 39:
+      // right arrow
       moveCursor(editor.ix + 1, editor.iy);
       break;
     case 40:
+      // down arrow
       moveCursor(editor.ix, editor.iy + 1);
+      break;
+    case 8:
+      // backspace
+      editor.ban[nrow*editor.iy + editor.ix] = '';
+      refreshKyokumen();
+      moveCursor(editor.ix - 1, editor.iy);
+      event.preventDefault();
+      break;
+    case 46:
+      // delete
+      editor.ban[nrow*editor.iy + editor.ix] = '';
+      refreshKyokumen();
       break;
   }
 
-  //console.log('key down' + event.which);
+  //console.log('key down ' + event.which);
 }
 
 /**
@@ -217,7 +231,7 @@ function createCursor() {
  */
 function moveCursor(ix, iy) {
   if(ix < 0) {
-    ix = 0;
+    ix = nrow - 1;
     iy--;
   }
   else if(ix >= nrow) {
