@@ -15,15 +15,47 @@ const SENTE = '☗';
 const GOTE = '☖';
 
 function eventWindowLoaded() {
+  createSVGs();
   drawKyokumens();
   setupMoves();
 }
 
+
 /**
- * Find all tags with class='kyokumen' and draw the kyokumens
+ * Find all tags with class='kyokumen' and create svg graphics within
+ */
+function createSVGs() {
+  var figs = document.getElementsByClassName('kyokumen');
+  var n = figs.length;
+  for (var i = 0; i < n; i++) {
+    var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    s.setAttribute('class', 'kyokumen-svg');
+
+
+    attrs = ['data-sfen', 'data-sente', 'data-gote']
+    for (var j =0; j < attrs.length; j++) {
+      a = figs[i].getAttribute(attrs[j]);
+      if (a) {
+	     s.setAttribute(attrs[j], a);
+     }
+    }
+
+    var figId = figs[i].getAttribute('id');
+    if (figId) {
+      s.setAttribute('id', figId + '-svg');
+    }
+
+
+    figs[i].appendChild(s);
+  }
+}
+
+
+/**
+ * Find all tags with class='kyokumen-svg' and draw the kyokumens
  */
 function drawKyokumens() {
-  var kyokumens = document.getElementsByClassName('kyokumen');
+  var kyokumens = document.getElementsByClassName('kyokumen-svg');
 
   var n = kyokumens.length;
   for (var i = 0; i < n; i++) {
@@ -45,16 +77,17 @@ function setupMoves() {
 
 /**
  *Variables:
- * *kyokumen* is an <svg> tag with class='kyokumen' and an sfen attribute
- * e.g.: <svg id='zu1' class='kyokumen'
- *         sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
- *        </svg>
+ * *kyokumen* is an <figure> tag with class='kyokumen' and an sfen attribute
+ * e.g.: <figure id='fig1' class='kyokumen'
+ *         sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b 1'>
+ *       </figure>
  * *width*is the width of the svg element, which is the length of the board in pixcels
  */
 
 function drawKyokumen(kyokumen) {
   var width = getWidth(kyokumen);
   var margin = getMargin(kyokumen);
+
   kyokumen.style.width = String(width + margin[1] + margin[3]) + 'px';
   kyokumen.style.height = String(width + margin[0] + margin[2]) + 'px';
   kyokumen.style.padding = '0'
@@ -410,7 +443,7 @@ function DrawGote(kyokumen, width, margin, sfen, i) {
 }
 
 function getWidth(kyokumen) {
-  var owidth = kyokumen.getAttribute("data-width");
+  var owidth = kyokumen.getAttribute('data-width');
   if(owidth) {
     return Number(owidth);
   }
@@ -440,7 +473,7 @@ function getMargin(kyokumen) {
     return omargin.split(',').map(Number);
   }
 
-  var sm = document.defaultView.getComputedStyle(kyokumen, null).padding
+    var sm = document.defaultView.getComputedStyle(kyokumen, null).padding
 
   var n = sm.length;
 
@@ -478,11 +511,14 @@ function getBoard(o) {
     return;
   }
 
+  boardid = boardid + '-svg';
+
   var kyokumen = document.getElementById(boardid);
   if (!kyokumen) {
     console.log('Error: board not found with id= ' + boardid);
     return;
   }
+
 
   return kyokumen;
 }
