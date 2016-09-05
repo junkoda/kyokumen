@@ -87,7 +87,7 @@ function setupMoves() {
 function drawKyokumen(kyokumen) {
   var width = getWidth(kyokumen);
   var margin = getMargin(kyokumen);
-    console.log(margin);  
+
   kyokumen.style.width = String(width + margin[1] + margin[3]) + 'px';
   kyokumen.style.height = String(width + margin[0] + margin[2]) + 'px';
   kyokumen.style.padding = '0'
@@ -474,7 +474,6 @@ function getMargin(kyokumen) {
   }
 
     var sm = document.defaultView.getComputedStyle(kyokumen, null).padding
-    console.log(sm);
 
   var n = sm.length;
 
@@ -512,10 +511,8 @@ function getBoard(o) {
     return;
   }
 
-  console.log(boardid)
+  boardid = boardid + '-svg';
 
-  boardid = boardid + '-svg'
-    console.log(boardid)
   var kyokumen = document.getElementById(boardid);
   if (!kyokumen) {
     console.log('Error: board not found with id= ' + boardid);
