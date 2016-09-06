@@ -1,5 +1,5 @@
 
-svg.kyokumen {
+svg.kyokumen-svg {
     width: 200px;
     font-size: 18px;
     display: block;
@@ -7,26 +7,26 @@ svg.kyokumen {
     padding: 30px 60px 10px 60px;
 }
 
-svg.kyokumen .ban {
+svg.kyokumen-svg .ban {
     stroke-width: 3;
     stroke: #000;
     fill: #FFF;
 }
 
-svg.kyokumen .sen {
+svg.kyokumen-svg .sen {
     stroke-width: 1;
     stroke: #000;
 }
 
-svg.kyokumen .koma, .nari-goma, .sente, .gote {
+svg.kyokumen-svg .koma, .nari-goma, .sente, .gote {
     writing-mode: tb; /* 縦書き */
 }
 
-svg.kyokumen .num {
+svg.kyokumen-svg .num {
     font-size: 16px;
 }
 
-svg.kyokumen .nari-goma {
+svg.kyokumen-svg .nari-goma {
     fill: #D00;
 }
 
