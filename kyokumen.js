@@ -4,9 +4,14 @@
  * Website:     https://github.com/junkoda/kyokumen
  */
 
+if (typeof kyokumen_js_ver == 'undefined') {
+  kyokumen_js_ver = '0.0.1'
+  kyokumen_js();
+}
+
+function kyokumen_js() {
 window.addEventListener('load', eventWindowLoaded, false);
 
-const ver = '0.0.1'
 const axisLine = 0.2;
 
 const nrow = 9;
@@ -15,7 +20,7 @@ const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九',
 const SENTE = '☗';
 const GOTE = '☖';
 
-const defaultCSS = 'https://junkoda.github.io/kyokumen/' + ver + '/kyokumen.css'
+const defaultCSS = 'https://junkoda.github.io/kyokumen/' + kyokumen_js_ver + '/kyokumen.css';
 
 loadDefaultCSS(defaultCSS);
 
@@ -453,8 +458,6 @@ function getWidth(kyokumen) {
     return Number(owidth);
   }
 
-  console.log(document.styleSheets);
-
   var str_width = document.defaultView.getComputedStyle(kyokumen, null).width;
   var width = parseFloat(str_width);
 
@@ -549,6 +552,5 @@ function loadDefaultCSS(filename)
   }
 }
 
-
-
+}
 
