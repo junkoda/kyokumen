@@ -1,15 +1,9 @@
 # Site settings
 title: Kyokumen.js
 github_username: junkoda
-data_url: http://www13273u.sakura.ne.jp
 
 # Build settings
 markdown: kramdown
-
-defaults:
-  -
-    values:
-      layout: "default"
 
 exclude:
   - Makefile

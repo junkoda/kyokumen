@@ -31,15 +31,15 @@ title: 局面.js by Jun Koda
 <section id="main-content">
 <h3>局面.js とは</h3>
 
-<svg id="board1" class="kyokumen" data-sente="☗先手" data-gote="☖後手"
+<figure id="fig1" class="kyokumen" data-sente="☗先手" data-gote="☖後手"
      data-sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b">
-</svg>
+</figure>
 
-<p>局面図を文章に埋め込むための JavaScript ライブラリです。局面図を表示するだけでなく、文字にマウスカーソルをあわせたときに局面図を更新することができます（<span class="mv" data-board="board1" data-sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b">☗７六歩</span><span class="mv" data-board="board1" data-sfen="lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b">☖３四歩</span>）</p>。
+<p>局面図を文章に埋め込むための JavaScript ライブラリです。局面図を表示するだけでなく、文字にマウスカーソルをあわせたときに局面図を更新することができます（<span class="mv" data-board="fig1" data-sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b">☗７六歩</span><span class="mv" data-board="fig1" data-sfen="lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b">☖３四歩</span>）。</p>
 
 <h3>使い方</h3>
 
-局面.js は局面図を生成するプログラム kyokumen.js と、図の見栄えを設定する CSS ファイルからなります。それらの HTML ファイルの中で指定して、局面図は <code>&lt;svg class=&quot;kyokumen&quot; &gt;</code> タグ、局面図の変更は <code>class=&quot;mv&quot;</code> 属性をもつタグで行います。
+局面.js は局面図を生成するプログラム kyokumen.js と、図の見栄えを設定する CSS ファイルからなります。それらの HTML ファイルの中で指定して、局面図は <code>&lt;figure class=&quot;kyokumen&quot; &gt;</code> タグ、局面図の変更は <code>class=&quot;mv&quot;</code> 属性をもつタグで行います。
 
 {% highlight html %}
 <!DOCTYPE html>
@@ -52,11 +52,11 @@ title: 局面.js by Jun Koda
 <body>
 <script src="https://junkoda.github.io/kyokumen/0/kyokumen.js"></script>
 
-<svg id="board1" class="kyokumen" data-sente="☗先手" data-gote="☖後手"
+<figure id="fig1" class="kyokumen" data-sente="☗先手" data-gote="☖後手"
      data-sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1">
-</svg>
+</figure>
 
-<p><span class="mv" data-board="board1"
+<p><span class="mv" data-board="fig1"
          data-sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b">
   ☗７六歩</span></p>
 </body>
