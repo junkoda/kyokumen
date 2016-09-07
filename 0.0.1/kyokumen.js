@@ -502,10 +502,8 @@ function getMargin(kyokumen) {
     margin = [parseFloat(sm[0]), parseFloat(sm[1]), parseFloat(sm[2]), parseFloat(sm[3])];
   }
   else {
-    margin = defaultStyle['margin'];
+    margin = [30, 60, 10, 60];
   }
-
-  console.log('margin', margin)
 
   return margin;
 }
