@@ -6,6 +6,7 @@
 
 window.addEventListener('load', eventWindowLoaded, false);
 
+const ver = '0.0.1'
 const axisLine = 0.2;
 
 const nrow = 9;
@@ -13,6 +14,10 @@ const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p
 const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
 const SENTE = '☗';
 const GOTE = '☖';
+
+const defaultCSS = 'https://junkoda.github.io/kyokumen/' + ver + '/kyokumen.css'
+
+loadDefaultCSS(defaultCSS);
 
 function eventWindowLoaded() {
   createSVGs();
@@ -87,7 +92,7 @@ function setupMoves() {
 function drawKyokumen(kyokumen) {
   var width = getWidth(kyokumen);
   var margin = getMargin(kyokumen);
-
+    
   kyokumen.style.width = String(width + margin[1] + margin[3]) + 'px';
   kyokumen.style.height = String(width + margin[0] + margin[2]) + 'px';
   kyokumen.style.padding = '0';
@@ -448,6 +453,8 @@ function getWidth(kyokumen) {
     return Number(owidth);
   }
 
+  console.log(document.styleSheets);
+
   var str_width = document.defaultView.getComputedStyle(kyokumen, null).width;
   var width = parseFloat(str_width);
 
@@ -469,14 +476,15 @@ function getMargin(kyokumen) {
   var margin = [];
 
   var omargin = kyokumen.getAttribute('data-margin');
+    
   if (omargin) {
     return omargin.split(',').map(Number);
   }
 
-    var sm = document.defaultView.getComputedStyle(kyokumen, null).padding;
+  var sm = document.defaultView.getComputedStyle(kyokumen, null).padding;
+  // Assume default without CSS padding is '0px'
 
-  var n = sm.length;
-
+  var n = sm === '0px' ? 0 : sm.length;
 
   if (n == 1) {
     m = parseFloat(sm[0]);
@@ -494,8 +502,10 @@ function getMargin(kyokumen) {
     margin = [parseFloat(sm[0]), parseFloat(sm[1]), parseFloat(sm[2]), parseFloat(sm[3])];
   }
   else {
-    margin = [30, 60, 10, 60];
+    margin = defaultStyle['margin'];
   }
+
+  console.log('margin', margin)
 
   return margin;
 }
@@ -522,4 +532,25 @@ function getBoard(o) {
 
   return kyokumen;
 }
+
+function loadDefaultCSS(filename)
+{
+  var link = document.createElement('link');
+  link.href = filename;
+  link.type = "text/css";
+  link.rel = "stylesheet";
+
+  head = document.getElementsByTagName('head')[0];
+
+  firstlink = head.getElementsByTagName('link')[0];
+  if (firstlink) {
+    head.insertBefore(link, firstlink)
+  }
+  else {
+    head.appendChild(link); 
+  }
+}
+
+
+
 
