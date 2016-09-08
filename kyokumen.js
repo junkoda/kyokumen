@@ -171,8 +171,6 @@ function clearKyokumen(kyokumen, cls) {
  * Draw a square and lines for shogi-ban
  */
 function drawBan(kyokumen, width, margin) {
-  //kyokumen.setAttribute('height', width);
-
   var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('class', 'ban');
   rect.setAttribute('x', margin[3]);
@@ -501,41 +499,20 @@ function getPadding(kyokumenFig, kyokumenSvg) {
    *  top right botton left
    */
 
-  var margin = [];
-
   var omargin = kyokumenFig.getAttribute('data-padding');
     
   if (omargin) {
     return omargin.split(',').map(Number);
   }
 
-  var sm = document.defaultView.getComputedStyle(kyokumenSvg, null).padding.split(' ');
+  var margin = [0, 0, 0, 0];
 
-  n = sm.length;
+  style = document.defaultView.getComputedStyle(kyokumenSvg, null)
 
-  switch(sm.length) {
-    case 1:
-      m = parseFloat(sm[0]);
-      margin = [m, m, m, m];
-      break;
-
-    case 2:
-      t = parseFloat(sm[0]);
-      l = parseFloat(sm[1]);
-      margin = [t, l, t, l];
-      break;
-
-    case 3:
-      margin = [parseFloat(sm[0]), parseFloat(sm[1]), parseFloat(sm[2]), parseFloat(sm[1])];
-      break;
-
-    case 4:
-      margin = [parseFloat(sm[0]), parseFloat(sm[1]), parseFloat(sm[2]), parseFloat(sm[3])];
-      break;
-
-    default:
-      margin = [30, 60, 10, 60];
-  }
+  margin[0] = parseFloat(style.paddingTop);
+  margin[1] = parseFloat(style.paddingRight);
+  margin[2] = parseFloat(style.paddingBottom);
+  margin[3] = parseFloat(style.paddingLeft);
 
   return margin;
 }
