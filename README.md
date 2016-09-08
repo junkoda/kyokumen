@@ -33,7 +33,7 @@ data-board は変更したい図の `id`。
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" type="text/css" href="https://junkoda.github.io/kyokumen/0.0.1/kyokumen.css">
+  <link rel="stylesheet" type="text/css" href="https://junkoda.github.io/kyokumen/0/kyokumen.css">
   <title>例</title>
 </head>
 <body>
