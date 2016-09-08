@@ -15,7 +15,7 @@
 ### 局面図を作る
 
 ```html
-<figure id="fig1" class="kyokumen" data-sente="☗先手" data-gote="☖後手" data-sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b 1"></figure>
+<figure id="fig1" class="kyokumen" data-sente="先手" data-gote="後手" data-sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b 1"></figure>
 ```
 
 ### 局面図を変更する
@@ -39,7 +39,7 @@ data-board は変更したい図の `id`。
 <body>
 <script src="https://junkoda.github.io/kyokumen/0/kyokumen.js"></script>
 
-<figure id="board1" class="kyokumen" data-sente="☗先手" data-gote="☖後手"
+<figure id="board1" class="kyokumen" data-sente="先手" data-gote="後手"
      data-sfen="8l/1l+R2P3/p2pBG1pp/kps1p4/Nn1P2G2/P1P1P2PP/1PS6/1KSG3+r1/LN2+p3L w Sbgn3p 124">
 </figure>
 
@@ -48,11 +48,6 @@ data-board は変更したい図の `id`。
 </body>
 </html>
 ```
-
-## 既知の問題
-
-* Safari では持ち駒の上の駒記号が回転してる
-
 
 ## 参加
 
