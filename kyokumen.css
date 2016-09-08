@@ -1,10 +1,10 @@
-
+    
 svg.kyokumen-svg {
     width: 200px;
     font-size: 18px;
     display: block;
     font-family: sans-serif;
-    padding: 30px 60px 10px 60px;
+    padding:  23px 48px 26px 35px;
 }
 
 svg.kyokumen-svg .ban {
@@ -22,15 +22,20 @@ svg.kyokumen-svg .koma, .nari-goma, .sente, .gote {
     writing-mode: tb; /* 縦書き */
 }
 
+svg.kyokumen-svg .komark {
+    glyph-orientation-vertical: 0;
+}
+
 svg.kyokumen-svg .num {
-    font-size: 16px;
+    font-size: 15px;
 }
 
 svg.kyokumen-svg .nari-goma {
     fill: #D00;
 }
 
-span:hover {
+
+span.mv:hover {
     text-decoration: underline;
 }
 

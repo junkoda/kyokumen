@@ -4,23 +4,21 @@
  * Website:     https://github.com/junkoda/kyokumen
  */
 
-if (typeof kyokumen_js_ver == 'undefined') {
-  kyokumen_js_ver = '0.0.1'
-  kyokumen_js();
-}
+if (typeof kyokumenJs == 'undefined') {
+kyokumenJs = {
+  ver: '0.0.1',
+  senteMark: '☗',
+  goteMark: '☖',
 
-function kyokumen_js() {
+main: function() {
+
 window.addEventListener('load', eventWindowLoaded, false);
-
-const axisLine = 0.2;
 
 const nrow = 9;
 const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p:'歩', '+l':'成香', '+n':'成桂', '+s':'成銀', '+r':'龍', '+b':'馬', '+p':'と'};
 const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
-const SENTE = '☗';
-const GOTE = '☖';
 
-const defaultCSS = 'https://junkoda.github.io/kyokumen/' + kyokumen_js_ver + '/kyokumen.css';
+const defaultCSS = 'https://junkoda.github.io/kyokumen/' + kyokumenJs.ver + '/kyokumen.css';
 
 loadDefaultCSS(defaultCSS);
 
@@ -168,7 +166,7 @@ function drawBan(kyokumen, width, margin) {
 
   var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('class', 'ban');
-  rect.setAttribute('x', margin[1]);
+  rect.setAttribute('x', margin[3]);
   rect.setAttribute('y', margin[0]);
   rect.setAttribute('width', width);
   rect.setAttribute('height', width);
@@ -180,8 +178,8 @@ function drawBan(kyokumen, width, margin) {
   for (var i = 1; i < nrow; i++) {
     var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('class', 'sen');
-    line.setAttribute('x1', margin[1]);
-    line.setAttribute('x2', margin[1] + width);
+    line.setAttribute('x1', margin[3]);
+    line.setAttribute('x2', margin[3] + width);
     line.setAttribute('y1', margin[0] + w * i);
     line.setAttribute('y2', margin[0] + w * i);
     kyokumen.appendChild(line);
@@ -190,8 +188,8 @@ function drawBan(kyokumen, width, margin) {
   // 縦線
   for (var i = 1; i < nrow; i++) {
     var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', margin[1] + w * i);
-    line.setAttribute('x2', margin[1] + w * i);
+    line.setAttribute('x1', margin[3] + w * i);
+    line.setAttribute('x2', margin[3] + w * i);
     line.setAttribute('class', 'sen');
     line.setAttribute('y1', margin[0]);
     line.setAttribute('y2', margin[0] + width);
@@ -203,17 +201,20 @@ function drawBan(kyokumen, width, margin) {
  *  Draw 9 ... 1 on top magin
  */
 function drawNumbersCol(kyokumen, width, margin) {
+  const offsetNumCol = kyokumenJs.offsetNumCol || 0.26;
+
   var w = width / nrow;
   label = ['９', '８', '７', '６', '５', '４', '３', '２', '１'];
 
   for (var i = 0; i < nrow; i++) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
-    num.setAttribute('x', margin[1] + w * (i + 0.5));
-    num.setAttribute('y', margin[0] + -w * axisLine - 2);
+    num.setAttribute('x', margin[3] + w * (i + 0.5));
+    num.setAttribute('y', margin[0] - w*offsetNumCol); // + -w * axisLine - 2);
+
 
     num.setAttribute('text-anchor', 'middle');
-    num.setAttribute('dominant-baseline', 'bottom');
+    //num.setAttribute('dominant-baseline', 'middle');
     var text = document.createTextNode(label[i]);
     num.appendChild(text);
     kyokumen.appendChild(num);
@@ -224,16 +225,19 @@ function drawNumbersCol(kyokumen, width, margin) {
  *  Draw 一、二、･･･、九 on left margin
  */
 function drawNumbersRow(kyokumen, width, margin) {
+  const offsetNumRow = kyokumenJs.offsetNumRow || 0.55;
   var w = width / nrow;
 
   for (var i = 0; i < nrow; i++) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
-    num.setAttribute('x', margin[1] + width + w * axisLine + 2);
+    num.setAttribute('x', margin[3] + width + w*offsetNumRow);
     num.setAttribute('y', margin[0] + w * (i + 0.5));
 
-    num.setAttribute('text-anchor', 'left');
-    num.setAttribute('dominant-baseline', 'middle');
+    num.setAttribute('text-anchor', 'middle');
+    //num.setAttribute('dominant-baseline', 'central');text-before-edge
+    //num.setAttribute('dominant-baseline', 'text-before-edge');
+    num.setAttribute('dominant-baseline', 'central');
     var text = document.createTextNode(numKanji[i]);
     num.appendChild(text);
     kyokumen.appendChild(num);
@@ -298,7 +302,7 @@ function drawPiece(kyokumen, margin, w, ix, iy, p) {
   var pieceText = Piece[p.toLowerCase()];
 
   if (pieceText) {
-    var x = margin[1] + w * (ix + 0.5);
+    var x = margin[3] + w * (ix + 0.5);
     var y = margin[0] + w * (iy + 0.5);
     var piece = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 
@@ -381,10 +385,11 @@ function skipTeban(sfen, i) {
  * Draw <svg sente='☗先手'> atrribute with Sente's pieces in hand.
  */
 function DrawSente(kyokumen, width, margin, sfen, i) {
+  const w = width/nrow;
   var n = sfen.length;
-  var sente = kyokumen.getAttribute('data-sente');
+  var sente = ' ' + kyokumen.getAttribute('data-sente');
   if (!sente)
-    sente = SENTE;
+    sente = '先手';
   sente += ' ';
 
   while (i < n) {
@@ -403,12 +408,19 @@ function DrawSente(kyokumen, width, margin, sfen, i) {
     }
   }
 
+  var komark = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+  komark.setAttribute('class', 'komark');
+  komark.appendChild(document.createTextNode(kyokumenJs.senteMark));
+
+
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'sente');
-  label.setAttribute('x', margin[1] + (1 + 1.5 / nrow) * width + 4);
+  label.setAttribute('x', margin[3] + width + w + (margin[1] - w)/2);
+  //label.setAttribute('x', margin[1] + (1 + 1.5 / nrow) * width + 4);
   label.setAttribute('y', margin[0]);
   label.setAttribute('dominant-baseline', 'central');
   var text = document.createTextNode(sente);
+  label.appendChild(komark);
   label.appendChild(text);
   kyokumen.appendChild(label);
 
@@ -420,9 +432,9 @@ function DrawSente(kyokumen, width, margin, sfen, i) {
  */
 function DrawGote(kyokumen, width, margin, sfen, i) {
   var n = sfen.length;
-  var gote = kyokumen.getAttribute('data-gote');
+  var gote = ' ' + kyokumen.getAttribute('data-gote');
   if (!gote)
-    gote = GOTE;
+    gote = '後手';
   gote += ' ';
 
   while (i < n) {
@@ -440,12 +452,19 @@ function DrawGote(kyokumen, width, margin, sfen, i) {
     }
   }
 
+  var komark = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+  komark.setAttribute('class', 'komark');
+  komark.appendChild(document.createTextNode(kyokumenJs.goteMark));
+
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'gote');
-  label.setAttribute('x', margin[1] - 0.4 * width / nrow);
+  //label.setAttribute('x', margin[1] - 0.4 * width / nrow);
+  label.setAttribute('x', margin[3]/2);
   label.setAttribute('y', margin[0]);
-  label.setAttribute('dominant-baseline', 'text-before-edge');
+  //label.setAttribute('dominant-baseline', 'text-before-edge');
+  label.setAttribute('dominant-baseline', 'central');
   var text = document.createTextNode(gote);
+  label.appendChild(komark);
   label.appendChild(text);
   kyokumen.appendChild(label);
 
@@ -458,11 +477,11 @@ function getWidth(kyokumen) {
     return Number(owidth);
   }
 
-  var str_width = document.defaultView.getComputedStyle(kyokumen, null).width;
-  var width = parseFloat(str_width);
+  var strWidth = document.defaultView.getComputedStyle(kyokumen, null).width;
+  var width = parseFloat(strWidth);
 
   if (!width) {
-    console.log('Error in width: ' + str_width);
+    console.log('Error in width: ' + strWidth);
     return undefined;
   }
 
@@ -484,7 +503,7 @@ function getMargin(kyokumen) {
     return omargin.split(',').map(Number);
   }
 
-  var sm = document.defaultView.getComputedStyle(kyokumen, null).padding;
+  var sm = document.defaultView.getComputedStyle(kyokumen, null).padding.split(' ');
   // Assume default without CSS padding is '0px'
 
   var n = sm === '0px' ? 0 : sm.length;
@@ -552,5 +571,8 @@ function loadDefaultCSS(filename)
   }
 }
 
+}}
+
+kyokumenJs.main();
 }
 
