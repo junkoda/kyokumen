@@ -523,7 +523,7 @@ function getPadding(kyokumenFig, kyokumenSvg) {
   * When o is itself a figure opject return o.
   */
 function getFig(o) {
-  if (o.tagName == 'figure')
+  if (o.tagName == 'FIGURE')
     return o;
 
   var boardid = o.getAttribute('data-board');
