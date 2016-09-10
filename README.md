@@ -49,13 +49,11 @@ data-board は変更したい図の `id`。
 </html>
 ```
 
-## 参加
+## Updates
 
-オープンソースへの参加を歓迎します。
+開発状況は
 
-* Javascript のコードレビュー（これは Javascript の習作につき）
-* デザインセンスのある人による CSS
-* 問題の指摘 （上のメニュー issues から）
-* より使いやすくするツール作成
+- [twitter/kyokumen_web](https://twitter.com/kyokumen_web)
+- [はてなブログ](http://junkoda.hatenablog.jp)
 
-などなど。
+に書いています。バグ報告・質問など気軽にしてください。
