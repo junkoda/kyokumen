@@ -285,7 +285,7 @@ function drawNumbersRow(svg, width, margin) {
 /**
  * Parse sfen string and draw pieces
  */
-function drawPieces(kyokumen, sfen, sente=null, gote=null, title=null) {
+function drawPieces(kyokumen, sfen, sente, gote, title) {
   // e.g. sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
   // for example for initial
 
