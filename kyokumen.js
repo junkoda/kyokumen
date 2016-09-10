@@ -4,19 +4,19 @@
  * Website:     https://github.com/junkoda/kyokumen
  */
 
-(function () {
 
 if (typeof kyokumenJs == 'undefined') {
-
-const nrow = 9;
-const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p:'歩', '+l':'成香', '+n':'成桂', '+s':'成銀', '+r':'龍', '+b':'馬', '+p':'と'};
-const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
 
 kyokumenJs = {
   ver: '0.0.2',
   senteMark: '☗',
   goteMark: '☖',
-}
+};
+
+(function () {
+const nrow = 9;
+const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p:'歩', '+l':'成香', '+n':'成桂', '+s':'成銀', '+r':'龍', '+b':'馬', '+p':'と'};
+const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
 
 
 function main() {
@@ -443,6 +443,9 @@ function DrawSente(svg, width, margin, sfen, sente, i) {
 
   while (i < n) {
     var p = sfen.charAt(i);
+    if(p === '-' || p === ' ')
+      break;
+
     number = parseInt(sfen.substring(i, n));
     if (number) {
       sente += numKanji[number - 1];
@@ -490,7 +493,10 @@ function DrawGote(svg, width, margin, sfen, gote, i) {
 
   while (i < n) {
     var p = sfen.charAt(i);
-    if (p == ' ') break;
+    if (p === '-' || p === ' ') {
+      i++;
+      break;
+    }
 
     number = parseInt(sfen.substring(i, n));
     if (number) {
@@ -575,9 +581,10 @@ function loadDefaultCSS(filename)
   }
 }
 
-
 main();
+}());
+
 }
 
-}());
+
 
