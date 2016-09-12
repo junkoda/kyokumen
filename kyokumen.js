@@ -524,6 +524,7 @@ function drawSente(svg, width, margin, sfen, sente, i) {
           pt.appendChild(document.createTextNode(Piece[pPrev.toLowerCase()]));
           pt.setAttribute('class', 'sente-piece-hand');
           pt.setAttribute('data-i', iPiece);
+          pt.setAttribute('data-p', pPrev.toLowerCase());
           label.appendChild(pt);
           //sente += Piece[pPrev.toLowerCase()]
       }
@@ -542,6 +543,7 @@ function drawSente(svg, width, margin, sfen, sente, i) {
       pt.appendChild(document.createTextNode(Piece[p.toLowerCase()]));
       pt.setAttribute('class', 'sente-piece-hand');
       pt.setAttribute('data-i', iPiece);
+      pt.setAttribute('data-p', p.toLowerCase());
 
       label.appendChild(pt);
       //sente += Piece[p.toLowerCase()];
@@ -599,6 +601,7 @@ function drawGote(svg, width, margin, sfen, gote, i) {
           pt.appendChild(document.createTextNode(Piece[pPrev.toLowerCase()]));
           pt.setAttribute('class', 'gote-piece-hand');
           pt.setAttribute('data-i', iPiece);
+          pt.setAttribute('data-p', pPrev.toLowerCase());
           //var pt = document.createTextNode(gote);
           //gote += Piece[pPrev.toLowerCase()]
           label.appendChild(pt);
@@ -618,6 +621,7 @@ function drawGote(svg, width, margin, sfen, gote, i) {
       pt.appendChild(document.createTextNode(Piece[p.toLowerCase()]));
       pt.setAttribute('class', 'gote-piece-hand');
       pt.setAttribute('data-i', iPiece);
+      pt.setAttribute('data-p', p.toLowerCase());
 
       label.appendChild(pt);
 

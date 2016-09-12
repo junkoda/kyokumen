@@ -18,7 +18,7 @@ const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p
 const PieceNum = {o:0, k:1, r:2, b:3, g:4, s:5, n:6, l:7, p:8};
 const PieceArray = ['o', 'k', 'r', 'b', 'g', 's', 'n', 'l', 'p'];
 const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
-
+const Promotable = {p: true, l: true, n: true, s: true, r: true, b:true, g: false, k: false, o: false}
 
 var editor = sfenEditorJs;
 
@@ -38,6 +38,10 @@ function main () {
     fig.addEventListener('keydown',  eventKeyDown);
     fig.addEventListener('keypress', eventKeyPress);
     fig.addEventListener('mousedown', eventMouseDown);
+    fig.addEventListener("dblclick", eventDoubleClick);
+    //ban = fig.getElementsByClassName('ban')[0];
+    //ban.addEventListener('mousedown', eventMouseDown);
+    //editor.banRect = ban;
 
     var sfenText = document.getElementById("sfen");
     sfenText.addEventListener('keyup', eventTextDown);
@@ -61,6 +65,7 @@ sfenEditorJs.init = function(fig) {
   this.width = kyokumen.width;
   this.margin = kyokumen.margin;
   this.w = this.width / nrow;
+  this.focus = null;
 
   createCursor(this)
 }
@@ -98,6 +103,7 @@ function moveCursor(ix, iy) {
   if(ix < 0 && iy < 0) {
     editor.ix = ix;
     editor.iy = iy;
+    editor.focus = null;
     cursor.setAttribute('visibility', 'hidden');
     return;
   }
@@ -120,63 +126,117 @@ function moveCursor(ix, iy) {
     cursor.setAttribute('x', editor.margin[3] + ix*editor.w + 2);
     cursor.setAttribute('y', editor.margin[0] + iy*editor.w + 2);
 
+    p = editor.ban[iy*nrow + ix];
     editor.ix = ix;
     editor.iy = iy;
+    editor.focus = {type: 'ban', ix: ix, iy: iy, p: p};
   }
 }
 
+/*
+ * Move piece from Sente's hand to board
+ */
+function movePieceFromSente(ix, iy)
+{
+  console.log('from sente')
 
+  var i = editor.focus.i;
+  var p = editor.focus.p
+
+  const iban2 = nrow*iy + ix;
+  var p2 = editor.ban[iban2];
+  if(p2) {
+    console.log('already occupied')
+    moveCursor(ix, iy);
+    return false;
+  }
+
+  console.log('to', iban2, p, i);
+  console.log(editor.senteHand);
+  editor.senteHand.splice(i, 1);
+  editor.ban[iban2] = p.toUpperCase();
+
+  return true;
+}
+
+/*
+ * Move piece from Sente's hand to board
+ */
+function movePieceFromGote(ix, iy)
+{
+  var i = editor.focus.i;
+  var p = editor.focus.p
+
+  const iban2 = nrow*iy + ix;
+  var p2 = editor.ban[iban2];
+  if(p2) {
+    console.log('already occupied')
+    moveCursor(ix, iy);
+    return false;
+  }
+
+  console.log('to', iban2, p, i);
+  console.log(editor.goteHand);
+  editor.goteHand.splice(i, 1);
+  editor.ban[iban2] = p;
+
+  return true;
+}
 /*
  * Move a piece at (editor.ix, editor.iy) to (ix, iy)
  */
 function movePiece(ix, iy)
 {
-  if(ix < 0 || iy < 0 || editor.ix < 0 || editor.iy < 0) {
-    console.log('Error; movePiece coordinate is negative.')
-    return false;
+  console.log('movePiece', editor.focus);
+
+  if(editor.focus === null)
+    return;
+
+  if(editor.focus.type === 'sente') {
+    if(!movePieceFromSente(ix, iy))
+      return;
   }
-  else if(ix == editor.ix && iy == editor.iy)
-    return true;
-  
-  //console.log('movePiece');
-
-  // current focus
-  var iban1 = editor.iy*nrow + editor.ix;
-  var p1 = editor.ban[iban1];
-  const gote1 = isGote(p1);
-
-  if(!p1) {
-    moveCursor(ix, iy);
-    return false;
+  else if(editor.focus.type === 'gote') {
+    if(!movePieceFromGote(ix, iy))
+      return;
   }
-
-  // destination
-  const iban2 = nrow*iy + ix;
-  var p2 = editor.ban[iban2];
-  const gote2 = isGote(p2);
-
-  if(p2 != '') {
-    if(gote1 == gote2) {
-      moveCursor(ix, iy);
-      return true; // Cannot take your own piece
+  else if(editor.focus.type === 'ban') {
+    if(ix == editor.ix && iy == editor.iy)
+      return; // destination is equal to source
+    else if(!editor.focus.p) {
+      return; // no piece in the focused square
     }
+
+    // current focus
+    var iban1 = editor.iy*nrow + editor.ix;
+    var p1 = editor.ban[iban1];
+    const gote1 = isGote(p1);
+
+    // destination
+    const iban2 = nrow*iy + ix;
+    var p2 = editor.ban[iban2];
+    const gote2 = isGote(p2);
+
+    if(p2 != '') {
+      if(gote1 == gote2) {
+        moveCursor(ix, iy);
+        return;
+      }
     
-    //console.log(gote1)
+      p2 = toPlain(p2); 
 
-    p2 = toPlain(p2); 
+      if(p2 && gote1) {
+        editor.goteHand.push(p2);
+      }
+      else if(p2) {
+        console.log('push to senteHand');
+        editor.senteHand.push(p2);
+      }
+    }
 
-    if(p2 && gote1) {
-      editor.goteHand.push(p2);
-    }
-    else if(p2) {
-      console.log('push to senteHand');
-      editor.senteHand.push(p2);
-    }
+    editor.ban[iban1] = '';
+    editor.ban[iban2] = p1;
   }
-
-  editor.ban[iban1] = '';
-  editor.ban[iban2] = p1;
-
   //refreshKyokumen();
   updateKyokumenFromBan();
 
@@ -184,43 +244,57 @@ function movePiece(ix, iy)
   return true;
 }
 
-function movePieceSente()
+function movePieceToSente()
 {
   // move focused piece (editor.ix, editor.iy) to Sente's hand
   console.log('movePiece Sente');
 
   // current focus
-  const iban = editor.iy*nrow + editor.ix;
-  const p = editor.ban[iban];
+  if(editor.focus === null || !editor.focus.p)
+    return;
+  else if(editor.focus.type === 'sente')
+    return;
 
-  if(!p)
-    return false;
+  const p = editor.focus.p;
+  console.log('p', p);
+  editor.senteHand.push(p.toLowerCase());
 
-  editor.senteHand.push(p.toUpperCase());
-  editor.ban[iban] = '';
+  if(editor.focus.type === 'ban') {
+    const iban = editor.focus.iy*nrow + editor.focus.ix;
+    editor.ban[iban] = '';
+  }
+  else if(editor.focus.type === 'gote') {
+    editor.goteHand.splice(editor.focus.i, 1);
+  }
 
-  refreshKyokumen();
-
-  return true;
+  moveCursor(-1, -1);
+  updateKyokumenFromBan();
 }
 
-function movePieceGote()
+function movePieceToGote()
 {
   console.log('movePiece Gote');
 
-  // current focus
-  const iban = editor.iy*nrow + editor.ix;
-  const p = editor.ban[iban];
+  if(editor.focus === null)
+    return;
+  else if(!editor.focus.p)
+    return;
+  else if(editor.focus.type === 'gote')
+    return;
 
-  if(!p)
-    return false;
-
+  const p = editor.focus.p;
   editor.goteHand.push(p.toLowerCase());
-  editor.ban[iban] = '';
 
-  refreshKyokumen();
+  if(editor.focus.type === 'ban') {
+    const iban = editor.focus.iy*nrow + editor.focus.ix;
+    editor.ban[iban] = '';
+  }
+  else if(editor.focus.type === 'sente') {
+    editor.senteHand.splice(editor.focus.i, 1);
+  }
 
-  return true;
+  moveCursor(-1, -1);
+  updateKyokumenFromBan();
 }
 
 function constructTextInHand(a)
@@ -274,6 +348,8 @@ function constructText(ban) {
   }
 
   text += ' b ';
+
+  console.log('senteHand', editor.senteHand)
   editor.senteHand = sortPieces(editor.senteHand);
   editor.goteHand = sortPieces(editor.goteHand);
 
@@ -510,9 +586,9 @@ function eventKeyPress(event) {
 
 
 function eventMouseDown(event) {
-  //var svg = this;
   var svg = editor.kyokumen.svg;
   var rect = svg.getBoundingClientRect();
+
   var width = editor.kyokumen.width;
   var w = width/nrow;
   var margin = editor.kyokumen.margin;
@@ -520,28 +596,126 @@ function eventMouseDown(event) {
   var ix = Math.floor((event.clientX - rect.left - margin[3])/w);
   var iy = Math.floor((event.clientY - rect.top  - margin[0])/w);
 
-  console.log(ix, iy);
+  console.log(ix, iy, editor.focus);
 
-  if (editor.ix >= 0 && editor.iy >= 0) {
+  if (editor.focus && editor.focus.p) {
     // focused
     if (0 <= ix && ix < nrow && 0 <= iy && iy < nrow)
       movePiece(ix, iy);
     else if (0 <= iy && iy < nrow && ix < 0)
-      movePieceGote();
+      movePieceToGote();
     else if (0 <= iy && iy < nrow && ix >= nrow)
-      movePieceSente();
-    
-    //moveCursor(-1, -1);
+      movePieceToSente();
   } 
   else
     // focus (ix, iy)
     moveCursor(ix, iy);
 }
 
+function switchCase(c)
+{
+  if(c === c.toLowerCase())
+    return c.toUpperCase();
+
+  return c.toLowerCase();
+}
+/*
+ * p -> +p -> P -> +P
+ */ 
+function nextPiece(ix, iy) {
+  var index = nrow*iy + ix;
+  var p = editor.ban[index]
+  if(!p) return false;
+
+  var pp;
+  if(p.length >= 2)
+    pp = switchCase(p[1]);
+  else if(Promotable[p.toLowerCase()])
+    pp = '+' + p;
+  else
+    pp = switchCase(p);
+
+  editor.ban[index] = pp;
+  return true;
+}
+
+function eventDoubleClick(event) {
+  var svg = editor.kyokumen.svg;
+  var rect = svg.getBoundingClientRect();
+
+  var width = editor.kyokumen.width;
+  var w = width/nrow;
+  var margin = editor.kyokumen.margin;
+
+  var ix = Math.floor((event.clientX - rect.left - margin[3])/w);
+  var iy = Math.floor((event.clientY - rect.top  - margin[0])/w);
+
+  console.log('double click', ix, iy);
+
+  if (0 <= ix && ix < nrow && 0 <= iy && iy < nrow) {
+    index = iy*nrow + ix;
+    if(nextPiece(ix, iy)) {
+      updateKyokumenFromBan();
+    }
+    moveCursor(ix, iy);
+  }
+}
+
+function eventSenteClick(e) {
+  console.log('sente click');
+
+  if (editor.focus === null) {
+    editor.focus = {
+      type: 'sente',
+      i: Number(this.getAttribute('data-i')),
+      p: this.getAttribute('data-p')
+    }
+
+    console.log('focus sente', editor.focus);
+  }
+  else {
+    moveCursor(-1, -1);
+  }
+  //editor.focus = {}
+  //console.log(e);
+  //console.log(this);
+}
+
+function eventGoteClick(e) {
+  if (editor.focus === null) {
+    editor.focus = {
+      type: 'gote',
+      i: Number(this.getAttribute('data-i')),
+      p: this.getAttribute('data-p')
+    }
+
+    console.log('focus gote', editor.focus);
+  }
+  else {
+    moveCursor(-1, -1);
+  }
+}
+
+function updateEventListeners() {
+  var svg = editor.kyokumen.svg;
+
+  var sentePieces = svg.getElementsByClassName('sente-piece-hand');
+  for(var i = 0; i<sentePieces.length; i++) {
+    sentePieces[i].addEventListener('click', eventSenteClick);
+    console.log('attach', sentePieces[i]);
+  }
+
+  var gotePieces = svg.getElementsByClassName('gote-piece-hand');
+  for(i = 0; i<gotePieces.length; i++) {
+    gotePieces[i].addEventListener('click', eventGoteClick);
+  }
+}
 
 function refreshKyokumen() {
   sfen = constructText(editor.ban);
   editor.kyokumen.draw(sfen);
+
+  updateEventListeners();
 }
 
 function updateKyokumenFromBan() {
@@ -550,21 +724,22 @@ function updateKyokumenFromBan() {
   sfen = constructText(editor.ban);
   sfenText.value = sfen;
   editor.kyokumen.draw(sfen);
+
+  updateEventListeners();
 }
 
 function updateKyokumenFromText(sfen) {
   var sfenText = document.getElementById("sfen");
-  //console.log('sfenText', sfenText.value);
 
   if(sfen === null)
       sfen = sfenText.value;
   constructBan(sfen);
 
-  //console.log(editor.ban);
-
   sfen = constructText(editor.ban);
   sfenText.value = sfen;
   editor.kyokumen.draw(sfen);
+
+  updateEventListeners();
 }
 /*
  * Move Cursor when an arrow key pressed

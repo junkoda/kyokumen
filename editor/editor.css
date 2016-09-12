@@ -34,6 +34,11 @@ span:hover {
     text-decoration: underline;
 }
 
+.sente-piece-hand {
+    background-color: yellow;
+    fill: red;
+}
+
 #cursor {
     fill: yellow;
 }
