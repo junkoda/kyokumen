@@ -15,6 +15,10 @@ var sfenEditorJs = {
 const nrow = 9;
 const pieceAscii = { 108:'l', 110:'n', 115:'s', 103:'g', 107:'k', 114:'r', 98:'b', 112:'p', 76:'L', 78:'N', 83:'S', 71:'G', 75:'K', 82:'R', 66:'B', 80:'P', 43:'+', 32:''};
 const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p:'歩', '+l':'成香', '+n':'成桂', '+s':'成銀', '+r':'龍', '+b':'馬', '+p':'と'};
+const PieceNum = {o:0, k:1, r:2, b:3, g:4, s:5, n:6, l:7, p:8};
+const PieceArray = ['o', 'k', 'r', 'b', 'g', 's', 'n', 'l', 'p'];
+const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
+
 
 var editor = sfenEditorJs;
 
@@ -38,7 +42,7 @@ function main () {
     var sfenText = document.getElementById("sfen");
     sfenText.addEventListener('keyup', eventTextDown);
 
-    updateKyokumenFromText();
+    updateKyokumenFromText(null);
   }
 }
 
@@ -48,6 +52,8 @@ function main () {
 
 sfenEditorJs.init = function(fig) {
   var kyokumen = fig.kyokumen;
+
+  kyokumen.svg.removeEventListener('click', kyokumen.reset);
 
   this.ban = new Array(nrow*nrow);
   this.fig = fig;
@@ -60,10 +66,16 @@ sfenEditorJs.init = function(fig) {
 }
 
 sfenEditorJs.set = function(sfen) {
-  sfen = sfen || 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1"'
+  sfen = sfen || '';
 
-  constructBan(sfen);
-  refreshKyokumen();
+  if (sfen === 'hirate') {
+    sfen =='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1'
+  }
+  
+  //constructBan(sfen);
+  //refreshKyokumen();
+  console.log('sfen', sfen);
+  updateKyokumenFromText(sfen);
 }
 
 
@@ -126,33 +138,39 @@ function movePiece(ix, iy)
   else if(ix == editor.ix && iy == editor.iy)
     return true;
   
-  console.log('movePiece');
+  //console.log('movePiece');
 
   // current focus
   var iban1 = editor.iy*nrow + editor.ix;
   var p1 = editor.ban[iban1];
   const gote1 = isGote(p1);
 
-  if(!p1)
+  if(!p1) {
+    moveCursor(ix, iy);
     return false;
+  }
 
   // destination
   const iban2 = nrow*iy + ix;
-  const p2 = editor.ban[iban2];
+  var p2 = editor.ban[iban2];
   const gote2 = isGote(p2);
 
   if(p2 != '') {
-    if(gote1 == gote2)
+    if(gote1 == gote2) {
+      moveCursor(ix, iy);
       return true; // Cannot take your own piece
-    
-    console.log(gote1)
-
-    if(gote1) {
-      editor.goteHand.push(p2.toUpperCase());
     }
-    else {
+    
+    //console.log(gote1)
+
+    p2 = toPlain(p2); 
+
+    if(p2 && gote1) {
+      editor.goteHand.push(p2);
+    }
+    else if(p2) {
       console.log('push to senteHand');
-      editor.senteHand.push(p2.toLowerCase());
+      editor.senteHand.push(p2);
     }
   }
 
@@ -162,6 +180,7 @@ function movePiece(ix, iy)
   //refreshKyokumen();
   updateKyokumenFromBan();
 
+  moveCursor(-1, -1);
   return true;
 }
 
@@ -204,6 +223,27 @@ function movePieceGote()
   return true;
 }
 
+function constructTextInHand(a)
+{
+  var text = '';
+  for(var i=0; i<a.length; i++) {
+    text += a[i];
+    var num = 1;
+    for(var j=i+1; j<a.length; j++) {
+      if(a[i] === a[j]) {
+        num++;
+      }
+      else
+        break;
+    }
+    if(num > 1) {
+      i += (num - 1);
+      text += num.toString();
+    }
+  }
+
+  return text;
+}
 /*
  * Construct a sfen text from ban[] and set it to text box
  */
@@ -234,10 +274,13 @@ function constructText(ban) {
   }
 
   text += ' b ';
-  for(var i=0; i<editor.senteHand.length; i++)
-    text += editor.senteHand[i].toUpperCase();
-  for(var i=0; i<editor.goteHand.length; i++)
-    text += editor.goteHand[i].toLowerCase();
+  editor.senteHand = sortPieces(editor.senteHand);
+  editor.goteHand = sortPieces(editor.goteHand);
+
+  
+  //for(var i=0; i<editor.goteHand.length; i++)
+  text += constructTextInHand(editor.senteHand).toUpperCase();
+  text += constructTextInHand(editor.goteHand).toLowerCase();
 
   if(editor.senteHand.length == 0 && editor.goteHand.length == 0)
     text += '-';
@@ -271,6 +314,9 @@ function isGote(character) {
   return (character == character.toLowerCase());
 }
 
+/*
+ * construct editor.senteHand array from sfen string
+ */
 function constructSenteHand(sfen, i) {
   const n = sfen.length;
 
@@ -353,6 +399,9 @@ function constructBan(sfen) {
   var ix = 0;
   var iy = 0;
   var iban = 0;
+
+  for(var i = 0; i <nrow*nrow; i++)
+    editor.ban[i] = '';
 
   for (i = 0; i < n; i++) {
     p = sfen.charAt(i);
@@ -482,7 +531,7 @@ function eventMouseDown(event) {
     else if (0 <= iy && iy < nrow && ix >= nrow)
       movePieceSente();
     
-    moveCursor(-1, -1);
+    //moveCursor(-1, -1);
   } 
   else
     // focus (ix, iy)
@@ -503,13 +552,15 @@ function updateKyokumenFromBan() {
   editor.kyokumen.draw(sfen);
 }
 
-function updateKyokumenFromText() {
+function updateKyokumenFromText(sfen) {
   var sfenText = document.getElementById("sfen");
-  console.log('sfenText', sfenText.value);
+  //console.log('sfenText', sfenText.value);
 
-  constructBan(sfenText.value);
+  if(sfen === null)
+      sfen = sfenText.value;
+  constructBan(sfen);
 
-  console.log(editor.ban);
+  //console.log(editor.ban);
 
   sfen = constructText(editor.ban);
   sfenText.value = sfen;
@@ -562,8 +613,36 @@ function eventKeyDown(event) {
 function eventTextDown(event) {
   console.log(event.which);
   if (event.which == 13) {
-    updateKyokumenFromText();
+    updateKyokumenFromText(null);
   }
+}
+
+/*
+ * Convert to plain lower case; +L -> l
+ */
+function toPlain(p) {
+  console.log(p);
+
+  const i = p[0] === '+' ? 1 : 0;
+  console.log(i);
+  return p[i].toLowerCase();
+}
+
+function sortPieces(a)
+{
+  aNum = [];
+
+  for(var i=0; i<a.length; i++)
+    aNum.push(PieceNum[a[i]]);
+
+  aNum.sort();
+
+  for(var i=0; i<a.length; i++)
+    a[i]= PieceArray[aNum[i]];
+
+  console.log('sortPieces', a);
+
+  return a;
 }
 
 
