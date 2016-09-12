@@ -11,6 +11,7 @@ kyokumenJs = {
   ver: '0',
   senteMark: '☗',
   goteMark: '☖',
+  maxDuplicate: 3
 };
 
 (function () {
@@ -22,8 +23,6 @@ const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九',
  * API of kyokumen.js usable by other codes
  */
 kyokumenJs.createKyokumen = createKyokumen; // create a kyokumen in figure
-kyokumenJs._drawSente = drawSente;
-kyokumenJs._drawGote = drawGote;
 
 
 /*
@@ -102,6 +101,7 @@ function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
   }
 
   this.reset = function() {
+    console.log('reset')
     _this.draw();
   }
 }
@@ -387,8 +387,8 @@ function drawPieces(kyokumen, sfen, sente, gote, title) {
 
   i = skipTeban(sfen, i);
 
-  i = kyokumenJs._drawSente(svg, width, margin, sfen, sente, i);
-  i = kyokumenJs._drawGote(svg, width, margin, sfen, gote, i);
+  i = drawSente(svg, width, margin, sfen, sente, i);
+  i = drawGote(svg, width, margin, sfen, gote, i);
 
   //kyokumen.sfen = sfen;
 }
@@ -495,25 +495,6 @@ function drawSente(svg, width, margin, sfen, sente, i) {
   else
     sente = ' ' + sente + ' ';
 
-  while (i < n) {
-    var p = sfen.charAt(i);
-    if(p === '-' || p === ' ')
-      break;
-
-    number = parseInt(sfen.substring(i, n));
-    if (number) {
-      sente += numKanji[number - 1];
-      i += String(number).length;
-    }
-    else if (isGote(p)) {
-      break;
-    }
-    else {
-      sente += Piece[p.toLowerCase()];
-      i++;
-    }
-  }
-
   var komark = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
   komark.setAttribute('class', 'komark');
   komark.appendChild(document.createTextNode(kyokumenJs.senteMark));
@@ -529,6 +510,48 @@ function drawSente(svg, width, margin, sfen, sente, i) {
   label.appendChild(komark);
   label.appendChild(text);
 
+  var iPiece = 0;
+  while (i < n) {
+    var p = sfen.charAt(i);
+    if(p === '-' || p === ' ')
+      break;
+
+    number = parseInt(sfen.substring(i, n));
+    if (number) {
+      if(pPrev && number < kyokumenJs.maxDuplicate) {
+        for(var j=1; j<number; j++) {}
+          var pt = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+          pt.appendChild(document.createTextNode(Piece[pPrev.toLowerCase()]));
+          pt.setAttribute('class', 'sente-piece-hand');
+          pt.setAttribute('data-i', iPiece);
+          label.appendChild(pt);
+          //sente += Piece[pPrev.toLowerCase()]
+      }
+      else if(pPrev) {
+        label.appendChild(document.createTextNode(numKanji[number - 1]));
+        iPiece += number - 1;
+        //sente += numKanji[number - 1];
+      }
+      i += String(number).length;
+    }
+    else if (isGote(p)) {
+      break;
+    }
+    else {
+      var pt = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      pt.appendChild(document.createTextNode(Piece[p.toLowerCase()]));
+      pt.setAttribute('class', 'sente-piece-hand');
+      pt.setAttribute('data-i', iPiece);
+
+      label.appendChild(pt);
+      //sente += Piece[p.toLowerCase()];
+      i++;
+      iPiece++;
+    }
+
+    var pPrev = p;
+  }
+
   svg.appendChild(label);
 
   return i;
@@ -539,29 +562,10 @@ function drawSente(svg, width, margin, sfen, sente, i) {
  */
 function drawGote(svg, width, margin, sfen, gote, i) {
   var n = sfen.length;
-  //var gote = ' ' + kyokumen.getAttribute('data-gote');
   if (!gote)
     gote = ' 後手 ';
   else
     gote = ' ' + gote + ' ';
-
-  while (i < n) {
-    var p = sfen.charAt(i);
-    if (p === '-' || p === ' ') {
-      i++;
-      break;
-    }
-
-    number = parseInt(sfen.substring(i, n));
-    if (number) {
-      gote += numKanji[number - 1];
-      i += String(number).length;
-    }
-    else {
-      gote += Piece[p.toLowerCase()];
-      i++;
-    }
-  }
 
   var komark = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
   komark.setAttribute('class', 'komark');
@@ -572,9 +576,64 @@ function drawGote(svg, width, margin, sfen, gote, i) {
   label.setAttribute('x', margin[3]/2);
   label.setAttribute('y', margin[0]);
   label.setAttribute('dominant-baseline', 'central');
-  var text = document.createTextNode(gote);
   label.appendChild(komark);
+
+  var text = document.createTextNode(gote);
   label.appendChild(text);
+
+  var iPiece = 0;
+
+  while (i < n) {
+    var p = sfen.charAt(i);
+    console.log('gote', p)
+    if (!p || p === '-' || p === ' ') {
+      i++;
+      break;
+    }
+
+    number = parseInt(sfen.substring(i, n));
+    if (number) {
+      if(pPrev && number < kyokumenJs.maxDuplicate) {
+        for(var j=1; j<number; j++) {
+          var pt = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+          pt.appendChild(document.createTextNode(Piece[pPrev.toLowerCase()]));
+          pt.setAttribute('class', 'gote-piece-hand');
+          pt.setAttribute('data-i', iPiece);
+          //var pt = document.createTextNode(gote);
+          //gote += Piece[pPrev.toLowerCase()]
+          label.appendChild(pt);
+          iPiece++;
+        }
+      }
+      else if(pPrev) {
+        label.appendChild(document.createTextNode(numKanji[number - 1]));
+        iPiece += number - 1;
+      }
+
+      i += String(number).length;
+    }
+    else {
+      //gote += Piece[p.toLowerCase()];
+      var pt = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      pt.appendChild(document.createTextNode(Piece[p.toLowerCase()]));
+      pt.setAttribute('class', 'gote-piece-hand');
+      pt.setAttribute('data-i', iPiece);
+
+      label.appendChild(pt);
+
+      i++;
+      iPiece++;
+    }
+
+    var pPrev = p;
+  }
+
+
+
+
+
+
+
 
   svg.appendChild(label);
 
