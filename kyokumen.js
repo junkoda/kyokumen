@@ -8,7 +8,7 @@
 if (typeof kyokumenJs == 'undefined') {
 
 kyokumenJs = {
-  ver: '0.0.2',
+  ver: '0',
   senteMark: '☗',
   goteMark: '☖',
 };
@@ -18,6 +18,17 @@ const nrow = 9;
 const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p:'歩', '+l':'成香', '+n':'成桂', '+s':'成銀', '+r':'龍', '+b':'馬', '+p':'と'};
 const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
 
+/*
+ * API of kyokumen.js usable by other codes
+ */
+kyokumenJs.createKyokumen = createKyokumen; // create a kyokumen in figure
+kyokumenJs._drawSente = drawSente;
+kyokumenJs._drawGote = drawGote;
+
+
+/*
+ * Main function for default use
+ */
 
 function main() {
   window.addEventListener('load', eventWindowLoaded, false);
@@ -38,21 +49,136 @@ function main() {
     var figs = document.getElementsByClassName('kyokumen');
 
     var n = figs.length;
-    for (var i = 0; i < n; i++)
-      createKyokumen(figs[i]);
+    for (var i = 0; i < n; i++) {
+      kyokumen = createKyokumen(figs[i]);
+      kyokumen.svg.addEventListener('click', kyokumen.reset, false);
+    }
   }
 
   /**
-   * Find all tags with class='mv' and attach event listener drawMove
+   * Find all tags with class='mv' and attach event listener
    */
   function setupMoves() {
     var moves = document.getElementsByClassName('mv');
 
     var n = moves.length;
-    for (var i = 0; i < moves.length; i++)
-      moves[i].addEventListener('mouseover', drawMove, false);
+    for (var i = 0; i < moves.length; i++) {
+      var mv = createMv(moves[i]);
+      moves[i].addEventListener('mouseover', mv.draw, false);
+    }
   }
 }
+
+/**
+ * kyokumen object constructor
+ */
+function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
+  var _this = this;
+
+  this.svg = svg;
+  this.width = width;
+  this.margin = margin;
+  this.sfen = sfen;
+  this.sente = sente;
+  this.gote = gote;
+  this.title = title;
+
+  this.clear = function() {
+    svg = _this.svg;
+    clearKyokumen(svg, 'koma');
+    clearKyokumen(svg, 'nari-goma');
+    clearKyokumen(svg, 'sente');
+    clearKyokumen(svg, 'gote');
+  }
+
+  this.draw = function(sfen, sente, gote, title) {
+    _this.clear();
+    sfen  = sfen  || _this.sfen;
+    sente = sente || _this.sente;
+    gote  = gote  || _this.gote;
+    title = title || _this.title;
+
+    drawPieces(_this, sfen, sente, gote, title);
+  }
+
+  this.reset = function() {
+    _this.draw();
+  }
+}
+
+/*
+ * Create a kyokumen object from fig = <figure class="kyokumen" sfen="...">
+ */
+function createKyokumen(fig) {
+  var svg = createKyokumenSvg(fig);
+  const width = getWidth(fig, svg);
+  const margin = getPadding(fig, svg);
+  const sfen = fig.getAttribute('data-sfen');
+  const sente = fig.getAttribute('data-sente');
+  const gote = fig.getAttribute('data-gote');
+  const title = fig.getAttribute('data-title');
+  // sente, gote can be falsy, default will be used.
+    
+  svg.style.width = String(width + margin[1] + margin[3]) + 'px';
+  svg.style.height = String(width + margin[0] + margin[2]) + 'px';
+  svg.style.padding = '0';
+  
+  kyokumen = new Kyokumen(svg, width, margin, sfen, sente, gote, title);
+  kyokumen.draw()
+
+  drawBan(svg, width, margin);        // Box and lines
+  drawNumbersCol(svg, width, margin); // Axis label ９、８、･･･、１
+  drawNumbersRow(svg, width, margin); // Axis label 一、二、･･･、九
+  drawPieces(kyokumen, sfen, sente, gote, title);
+
+  fig.kyokumen = kyokumen;
+
+  return kyokumen;
+}
+
+/**
+ * mv object constructor
+ */
+function Mv(kyokumen, sfen, sente, gote, title) {
+  var _this = this;
+
+  this.kyokumen = kyokumen;
+  this.sfen = sfen;
+  this.sente = sente;
+  this.gote = gote;
+  this.title = title;
+
+  this.draw = function() {
+    _this.kyokumen.draw(_this.sfen, _this.sente, _this.gote, _this.title);
+  }
+}
+
+/*
+ * Create a mv object from e = <span class="mv" data-sfen="..." ...>
+ */
+function createMv(e) {
+  var fig = getFig(e);
+  if (!fig) return;
+
+  var kyokumen = fig.kyokumen;
+
+  var sfen = e.getAttribute('data-sfen');
+  if (!sfen) {
+    console.log('Error: unable to get sfen in move:');
+    console.log(e);
+  }
+
+  var sente = e.getAttribute('data-sente') || fig.getAttribute('data-sente');
+  var gote  = e.getAttribute('data-gote')  || fig.getAttribute('data-gote');
+  var title = e.getAttribute('data-title') || fig.getAttribute('data-title');
+
+  //var svg = kyokumen.svg;
+
+  mv = new Mv(kyokumen, sfen, sente, gote, title);
+
+  return mv;
+}
+
 
 
 /**
@@ -124,80 +250,6 @@ function getPadding(fig, svg) {
   return margin;
 }
 
-/*
- * Create a kyokumen object and display it in the fig element
- */
-function createKyokumen(fig) {
-  var svg = createKyokumenSvg(fig);
-  const width = getWidth(fig, svg);
-  const margin = getPadding(fig, svg);
-  const sfen = fig.getAttribute('data-sfen');
-  const sente = fig.getAttribute('data-sente');
-  const gote = fig.getAttribute('data-gote');
-  const title = fig.getAttribute('data-title');
-  // sente, gote can be falsy, default will be used.
-    
-  svg.style.width = String(width + margin[1] + margin[3]) + 'px';
-  svg.style.height = String(width + margin[0] + margin[2]) + 'px';
-  svg.style.padding = '0';
-
-  /*
-   * kyokumen object
-   */
-  fig.kyokumen = {
-    'svg': svg,
-    'width': width,
-    'margin': margin,
-    'sente': sente,
-    'gote': gote,
-    'title': title,
-    'clear': function() {
-      svg = this.svg;
-      clearKyokumen(svg, 'koma');
-      clearKyokumen(svg, 'nari-goma');
-      clearKyokumen(svg, 'sente');
-      clearKyokumen(svg, 'gote');
-    },
-    'draw': function(sfen, sente, gote, title) {
-      this.clear();
-      drawPieces(this, sfen, sente, gote, title);
-    }
-  };
-
-  drawBan(svg, width, margin);        // Box and lines
-  drawNumbersCol(svg, width, margin); // Axis label ９、８、･･･、１
-  drawNumbersRow(svg, width, margin); // Axis label 一、二、･･･、九
-  drawPieces(fig.kyokumen, sfen, sente, gote, title);
-}
-
-/**
- * Draw move
- */
-function drawMove() {
-  /**
-   * @this is a class='mv' tag width board='board id' and sfen
-   */
-
-  var fig = getFig(this);
-  if (!fig) return;
-
-  var kyokumen = fig.kyokumen;
-
-  var sfen = this.getAttribute('data-sfen');
-  if (!sfen) {
-    console.log('Error: unable to get sfen in move:');
-    console.log(this);
-  }
-
-  var sente = this.getAttribute('data-sente') || fig.getAttribute('data-sente');
-  var gote = this.getAttribute('data-gote') || fig.getAttribute('data-gote');
-  var title = this.getAttribute('data-title') || fig.getAttribute('data-title');
-
-  var svg = kyokumen.svg;
-
-  // Remove existing pieces
-  kyokumen.draw(sfen, sente, gote, title);
-}
 
 
 /**
@@ -289,15 +341,17 @@ function drawPieces(kyokumen, sfen, sente, gote, title) {
   // e.g. sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
   // for example for initial
 
+  /*
   kyokumen.sfen = sfen;
   if(sente) kyokumen.sente = sente;
   if(gote) kyokumen.gote = gote;
   if(title) kyokumen.title = title;
+  */
 
   var svg = kyokumen.svg;
   const width = kyokumen.width;
   const margin = kyokumen.margin;
-  sfen= kyokumen.sfen;
+  //sfen= kyokumen.sfen;
 
   const w = width / nrow;
   const n = sfen.length;
@@ -333,10 +387,10 @@ function drawPieces(kyokumen, sfen, sente, gote, title) {
 
   i = skipTeban(sfen, i);
 
-  i = DrawSente(svg, width, margin, sfen, kyokumen.sente, i);
-  i = DrawGote(svg, width, margin, sfen, kyokumen.gote, i);
+  i = kyokumenJs._drawSente(svg, width, margin, sfen, sente, i);
+  i = kyokumenJs._drawGote(svg, width, margin, sfen, gote, i);
 
-  kyokumen.sfen = sfen;
+  //kyokumen.sfen = sfen;
 }
 
 /**
@@ -432,7 +486,7 @@ function skipTeban(sfen, i) {
 /**
  * Draw <svg sente='☗先手'> atrribute with Sente's pieces in hand.
  */
-function DrawSente(svg, width, margin, sfen, sente, i) {
+function drawSente(svg, width, margin, sfen, sente, i) {
   const w = width/nrow;
   var n = sfen.length;
 
@@ -483,7 +537,7 @@ function DrawSente(svg, width, margin, sfen, sente, i) {
 /**
  * Draw <svg gote='☖後手'> attribute with Gote's pieces in hand.
  */
-function DrawGote(svg, width, margin, sfen, gote, i) {
+function drawGote(svg, width, margin, sfen, gote, i) {
   var n = sfen.length;
   //var gote = ' ' + kyokumen.getAttribute('data-gote');
   if (!gote)
