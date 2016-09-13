@@ -37,7 +37,7 @@ function main () {
 
     fig.addEventListener('keydown',  eventKeyDown);
     fig.addEventListener('keypress', eventKeyPress);
-    fig.addEventListener('mousedown', eventMouseDown);
+    fig.addEventListener('click', eventMouseDown);
     fig.addEventListener("dblclick", eventDoubleClick);
     //ban = fig.getElementsByClassName('ban')[0];
     //ban.addEventListener('mousedown', eventMouseDown);
@@ -77,9 +77,6 @@ sfenEditorJs.set = function(sfen) {
     sfen =='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1'
   }
   
-  //constructBan(sfen);
-  //refreshKyokumen();
-  console.log('sfen', sfen);
   updateKyokumenFromText(sfen);
 }
 
@@ -138,21 +135,16 @@ function moveCursor(ix, iy) {
  */
 function movePieceFromSente(ix, iy)
 {
-  console.log('from sente')
-
   var i = editor.focus.i;
   var p = editor.focus.p
 
   const iban2 = nrow*iy + ix;
   var p2 = editor.ban[iban2];
   if(p2) {
-    console.log('already occupied')
     moveCursor(ix, iy);
     return false;
   }
 
-  console.log('to', iban2, p, i);
-  console.log(editor.senteHand);
   editor.senteHand.splice(i, 1);
   editor.ban[iban2] = p.toUpperCase();
 
@@ -170,13 +162,10 @@ function movePieceFromGote(ix, iy)
   const iban2 = nrow*iy + ix;
   var p2 = editor.ban[iban2];
   if(p2) {
-    console.log('already occupied')
     moveCursor(ix, iy);
     return false;
   }
 
-  console.log('to', iban2, p, i);
-  console.log(editor.goteHand);
   editor.goteHand.splice(i, 1);
   editor.ban[iban2] = p;
 
@@ -187,8 +176,6 @@ function movePieceFromGote(ix, iy)
  */
 function movePiece(ix, iy)
 {
-  console.log('movePiece', editor.focus);
-
   if(editor.focus === null)
     return;
 
@@ -229,7 +216,6 @@ function movePiece(ix, iy)
         editor.goteHand.push(p2);
       }
       else if(p2) {
-        console.log('push to senteHand');
         editor.senteHand.push(p2);
       }
     }
@@ -237,7 +223,7 @@ function movePiece(ix, iy)
     editor.ban[iban1] = '';
     editor.ban[iban2] = p1;
   }
-  //refreshKyokumen();
+
   updateKyokumenFromBan();
 
   moveCursor(-1, -1);
@@ -247,7 +233,6 @@ function movePiece(ix, iy)
 function movePieceToSente()
 {
   // move focused piece (editor.ix, editor.iy) to Sente's hand
-  console.log('movePiece Sente');
 
   // current focus
   if(editor.focus === null || !editor.focus.p)
@@ -256,7 +241,6 @@ function movePieceToSente()
     return;
 
   const p = editor.focus.p;
-  console.log('p', p);
   editor.senteHand.push(p.toLowerCase());
 
   if(editor.focus.type === 'ban') {
@@ -273,8 +257,6 @@ function movePieceToSente()
 
 function movePieceToGote()
 {
-  console.log('movePiece Gote');
-
   if(editor.focus === null)
     return;
   else if(!editor.focus.p)
@@ -318,6 +300,7 @@ function constructTextInHand(a)
 
   return text;
 }
+
 /*
  * Construct a sfen text from ban[] and set it to text box
  */
@@ -349,12 +332,9 @@ function constructText(ban) {
 
   text += ' b ';
 
-  console.log('senteHand', editor.senteHand)
   editor.senteHand = sortPieces(editor.senteHand);
   editor.goteHand = sortPieces(editor.goteHand);
 
-  
-  //for(var i=0; i<editor.goteHand.length; i++)
   text += constructTextInHand(editor.senteHand).toUpperCase();
   text += constructTextInHand(editor.goteHand).toLowerCase();
 
@@ -373,7 +353,6 @@ function skipTeban(sfen, i) {
   var n = sfen.length;
   while (i < n) {
     p = sfen.charAt(i);
-    console.log(p);
 
     if (p == ' ')
       i++;
@@ -425,8 +404,6 @@ function constructSenteHand(sfen, i) {
     }
   }
 
-  console.log('sente', editor.senteHand);
-
   return i;
 }
 
@@ -459,8 +436,6 @@ function constructGoteHand(sfen, i) {
     }
   }
 
-  console.log('gote', editor.goteHand);
-
   return i;
 }
 
@@ -482,10 +457,7 @@ function constructBan(sfen) {
   for (i = 0; i < n; i++) {
     p = sfen.charAt(i);
 
-    if (!(Piece[p.toLowerCase()] || parseInt(p) || p === ' '))
-      continue;
-
-    if (p == '+') {
+    if (p === '+') {
       p = sfen.substring(i, i + 2);
       i++;
     }
@@ -504,14 +476,12 @@ function constructBan(sfen) {
     else if (p == ' ') { // End of board discription
       break;
     }
-    else {
+    else if(Piece[p.toLowerCase()]) {      
       editor.ban[iban] = p;
       ix++;
       iban ++;
     }
   }
-
-  //console.log(editor.ban);
 
   i = skipTeban(sfen, i);
 
@@ -524,12 +494,10 @@ function constructBan(sfen) {
  */
 
 function eventKeyPress(event) {
-  //console.log('key press ' + event.which);
   /**
    * Keyboard short cut with ctrl
    */
   if(event.ctrlKey) {
-    console.log('ctrl + ' + event.which);
     // Keyboard shortcut with ctrl
     switch(event.which) {
       case 1: // 'ctrl + a' begining of line
@@ -556,16 +524,9 @@ function eventKeyPress(event) {
         break;
     }
   }
-  else if (event.which == 13) {
-    // shift + return
-    // create a figure (ToDO!!!)
-    alert('shift + return')
-  }
   else {
     key = pieceAscii[event.which];
     if(key === undefined) return;
-
-    //console.log(key);
 
     index = nrow*editor.iy + editor.ix;
     if(editor.ban[index] === '+' && key != '+' && key !== '') {
@@ -576,11 +537,8 @@ function eventKeyPress(event) {
       editor.ban[index] = key;
     }
 
-
-    //console.log(editor.ban[index]);
-    refreshKyokumen();
+    updateKyokumenFromBan();
     moveCursor(editor.ix + 1, editor.iy);
- 
   }
 }
 
@@ -595,8 +553,6 @@ function eventMouseDown(event) {
 
   var ix = Math.floor((event.clientX - rect.left - margin[3])/w);
   var iy = Math.floor((event.clientY - rect.top  - margin[0])/w);
-
-  console.log(ix, iy, editor.focus);
 
   if (editor.focus && editor.focus.p) {
     // focused
@@ -619,6 +575,7 @@ function switchCase(c)
 
   return c.toLowerCase();
 }
+
 /*
  * p -> +p -> P -> +P
  */ 
@@ -650,8 +607,6 @@ function eventDoubleClick(event) {
   var ix = Math.floor((event.clientX - rect.left - margin[3])/w);
   var iy = Math.floor((event.clientY - rect.top  - margin[0])/w);
 
-  console.log('double click', ix, iy);
-
   if (0 <= ix && ix < nrow && 0 <= iy && iy < nrow) {
     index = iy*nrow + ix;
     if(nextPiece(ix, iy)) {
@@ -662,23 +617,16 @@ function eventDoubleClick(event) {
 }
 
 function eventSenteClick(e) {
-  console.log('sente click');
-
   if (editor.focus === null) {
     editor.focus = {
       type: 'sente',
       i: Number(this.getAttribute('data-i')),
       p: this.getAttribute('data-p')
     }
-
-    console.log('focus sente', editor.focus);
   }
   else {
     moveCursor(-1, -1);
   }
-  //editor.focus = {}
-  //console.log(e);
-  //console.log(this);
 }
 
 function eventGoteClick(e) {
@@ -688,8 +636,6 @@ function eventGoteClick(e) {
       i: Number(this.getAttribute('data-i')),
       p: this.getAttribute('data-p')
     }
-
-    console.log('focus gote', editor.focus);
   }
   else {
     moveCursor(-1, -1);
@@ -702,7 +648,6 @@ function updateEventListeners() {
   var sentePieces = svg.getElementsByClassName('sente-piece-hand');
   for(var i = 0; i<sentePieces.length; i++) {
     sentePieces[i].addEventListener('click', eventSenteClick);
-    console.log('attach', sentePieces[i]);
   }
 
   var gotePieces = svg.getElementsByClassName('gote-piece-hand');
@@ -745,8 +690,6 @@ function updateKyokumenFromText(sfen) {
  * Move Cursor when an arrow key pressed
  */
 function eventKeyDown(event) {
-  console.log(event.which);
-
   switch(event.which) {
     case 27:
       // Esc
@@ -781,12 +724,9 @@ function eventKeyDown(event) {
       refreshKyokumen();
       break;
   }
-
-  //console.log('key down ' + event.which);
 }
 
 function eventTextDown(event) {
-  console.log(event.which);
   if (event.which == 13) {
     updateKyokumenFromText(null);
   }
@@ -796,10 +736,8 @@ function eventTextDown(event) {
  * Convert to plain lower case; +L -> l
  */
 function toPlain(p) {
-  console.log(p);
-
   const i = p[0] === '+' ? 1 : 0;
-  console.log(i);
+
   return p[i].toLowerCase();
 }
 
@@ -814,8 +752,6 @@ function sortPieces(a)
 
   for(var i=0; i<a.length; i++)
     a[i]= PieceArray[aNum[i]];
-
-  console.log('sortPieces', a);
 
   return a;
 }

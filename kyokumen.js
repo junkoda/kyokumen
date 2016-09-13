@@ -101,7 +101,6 @@ function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
   }
 
   this.reset = function() {
-    console.log('reset')
     _this.draw();
   }
 }
@@ -587,7 +586,6 @@ function drawGote(svg, width, margin, sfen, gote, i) {
 
   while (i < n) {
     var p = sfen.charAt(i);
-    console.log('gote', p)
     if (!p || p === '-' || p === ' ') {
       i++;
       break;
