@@ -459,6 +459,18 @@ function isGote(character) {
   return (character == character.toLowerCase());
 }
 
+function skipSpace(sfen, i) {
+  var n = sfen.length;
+  while (i < n) {
+    p = sfen.charAt(i);
+    if (p === ' ')
+      i++;
+    else
+      break;
+  }
+  return i;
+}
+
 /**
  * Skip [space]b or w[space] in sfen string sfen[i] and later
  * Args:
@@ -468,17 +480,21 @@ function isGote(character) {
  *     index i after [space]b/w[space]
  */
 function skipTeban(sfen, i) {
+  i = skipSpace(sfen, i);
+
   var n = sfen.length;
-  while (i < n) {
+  if (i < n) {
     p = sfen.charAt(i);
-    if (p == ' ')
-      i++;
-    else if (p == 'b' || p == 'w') {
+    if (p == 'b' || p == 'w') {
       i++;
     }
-    else
-      break;
+    else {
+      console.log('Error: teban b or w not found')
+    }
   }
+
+  i = skipSpace(sfen, i);
+
   return i;
 }
 
@@ -568,6 +584,7 @@ function drawGote(svg, width, margin, sfen, gote, i) {
   else
     gote = ' ' + gote + ' ';
 
+
   var komark = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
   komark.setAttribute('class', 'komark');
   komark.appendChild(document.createTextNode(kyokumenJs.goteMark));
@@ -586,6 +603,7 @@ function drawGote(svg, width, margin, sfen, gote, i) {
 
   while (i < n) {
     var p = sfen.charAt(i);
+
     if (!p || p === '-' || p === ' ') {
       i++;
       break;
