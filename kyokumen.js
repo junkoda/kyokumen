@@ -88,16 +88,18 @@ function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
     clearKyokumen(svg, 'nari-goma');
     clearKyokumen(svg, 'sente');
     clearKyokumen(svg, 'gote');
+    clearKyokumen(svg, 'title');
   }
 
   this.draw = function(sfen, sente, gote, title) {
-    _this.clear();
     sfen  = sfen  || _this.sfen;
     sente = sente || _this.sente;
     gote  = gote  || _this.gote;
     title = title || _this.title;
 
-    drawPieces(_this, sfen, sente, gote, title);
+    _this.clear();
+    drawTitle(_this, title);
+    drawPieces(_this, sfen, sente, gote);
   }
 
   this.reset = function() {
@@ -301,7 +303,7 @@ function drawNumbersCol(svg, width, margin) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
     num.setAttribute('x', margin[3] + w * (i + 0.5));
-    num.setAttribute('y', margin[0] - w*offsetNumCol); // + -w * axisLine - 2);
+    num.setAttribute('y', margin[0] - w*offsetNumCol);
 
 
     num.setAttribute('text-anchor', 'middle');
@@ -336,7 +338,7 @@ function drawNumbersRow(svg, width, margin) {
 /**
  * Parse sfen string and draw pieces
  */
-function drawPieces(kyokumen, sfen, sente, gote, title) {
+function drawPieces(kyokumen, sfen, sente, gote) {
   // e.g. sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
   // for example for initial
 
@@ -648,16 +650,27 @@ function drawGote(svg, width, margin, sfen, gote, i) {
     var pPrev = p;
   }
 
-
-
-
-
-
-
-
   svg.appendChild(label);
 
   return i;
+}
+
+function drawTitle(kyokumen, title) {
+  if (title) {
+    const width = kyokumen.width;
+    const w = width / nrow;
+    const margin = kyokumen.margin;
+
+    var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('class', 'title');
+    label.setAttribute('x', margin[3] + width/2);
+    label.setAttribute('y', (margin[0] - w)/2);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('dominant-baseline', 'central');
+
+    label.appendChild(document.createTextNode(title));
+    kyokumen.svg.appendChild(label);
+  }
 }
 
 /**
