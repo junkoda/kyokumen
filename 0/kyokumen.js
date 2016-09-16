@@ -8,7 +8,7 @@
 if (typeof kyokumenJs == 'undefined') {
 
 kyokumenJs = {
-  ver: '0',
+  ver: '0.0.3',
   senteMark: '☗',
   goteMark: '☖',
   maxDuplicate: 3
