@@ -423,4 +423,9 @@ footer a:hover {
   color: #444;
 }
 
+nav {
+  padding: 10px;
+  margin: 0 auto;
+  width: 940px;
+}
 

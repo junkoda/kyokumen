@@ -457,10 +457,7 @@ function constructBan(sfen) {
   for (i = 0; i < n; i++) {
     p = sfen.charAt(i);
 
-    if (!(Piece[p.toLowerCase()] || parseInt(p) || p === ' '))
-      continue;
-
-    if (p == '+') {
+    if (p === '+') {
       p = sfen.substring(i, i + 2);
       i++;
     }
@@ -479,7 +476,7 @@ function constructBan(sfen) {
     else if (p == ' ') { // End of board discription
       break;
     }
-    else {
+    else if(Piece[p.toLowerCase()]) {      
       editor.ban[iban] = p;
       ix++;
       iban ++;

@@ -4,7 +4,7 @@ svg.kyokumen-svg {
     font-size: 18px;
     display: block;
     font-family: sans-serif;
-    padding:  23px 48px 26px 35px;
+    padding:  43px 48px 26px 35px;
 }
 
 svg.kyokumen-svg .ban {
@@ -34,6 +34,9 @@ svg.kyokumen-svg .nari-goma {
     fill: #D00;
 }
 
+svg.kyokumen-svg .title {
+    font-size: 15px;
+}
 
 span.mv:hover {
     text-decoration: underline;
