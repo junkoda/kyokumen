@@ -37,8 +37,9 @@ function main() {
   loadDefaultCSS(defaultCSS);
 
   function eventWindowLoaded() {
-    setupKyokumens();
-    setupMoves();
+    //setupKyokumens();
+    //setupMoves();
+    setup(document.body, null);
   }
 
   /**
@@ -65,6 +66,33 @@ function main() {
       var mv = createMv(moves[i]);
       moves[i].addEventListener('mouseover', mv.draw, false);
     }
+  }
+
+  /**
+   * Traverse DOM and setup kyokumen and moves
+   */
+  function setup(node, fig) {
+    if(node.children.nodeType === 1)
+      return fig;
+
+    if(node.className === 'kyokumen') {
+      fig = node;
+      kyokumen = createKyokumen(fig);
+      kyokumen.svg.addEventListener('click', kyokumen.reset, false);
+    }
+    else if(node.className === 'mv') {
+      var mv = createMv(node, fig);
+      if(mv)
+        node.addEventListener('mouseover', mv.draw, false);
+      else
+        console.log('Error: unable to create mv in tab', mv);
+    }
+    else {
+      for(var i=0; i<node.children.length; i++)
+        fig = setup(node.children[i], fig);
+    }
+
+    return fig;
   }
 }
 
@@ -157,8 +185,8 @@ function Mv(kyokumen, sfen, sente, gote, title) {
 /*
  * Create a mv object from e = <span class="mv" data-sfen="..." ...>
  */
-function createMv(e) {
-  var fig = getFig(e);
+function createMv(e, fig) {
+  fig = getFig(e) || fig;
   if (!fig) return;
 
   var kyokumen = fig.kyokumen;
@@ -698,6 +726,8 @@ function getFig(o) {
     return o;
 
   var boardid = o.getAttribute('data-board');
+  if(!boardid)
+    return undefined;
 
   var kyokumenFig = document.getElementById(boardid);
   if (!kyokumenFig) {
