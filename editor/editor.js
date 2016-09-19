@@ -8,6 +8,7 @@ if (typeof sfenEditorJs == 'undefined') {
 var sfenEditorJs = {
   senteHand: [], // 先手持ち駒
   goteHand: [], // 後手持ち駒
+  debug: false,
 };
 
 (function () {
@@ -383,25 +384,31 @@ function constructSenteHand(sfen, i) {
     if(p === '-' || p === ' ')
       break;
 
-    if (!(Piece[p.toLowerCase()] || parseInt(p))) {
+    if (!Piece[p.toLowerCase()]) {
+      // Not a piece nor a number -> neglect
+      console.log('Error: this is not a piece', p);
       i++;
       continue;
-    }
-
-    number = parseInt(sfen.substring(i, n));
-    if (number) {
-      for(var k=0; k<number; k++)
-        editor.senteHand.push(p.toLowerCase());
-
-      i += String(number).length;
     }
     else if (isGote(p)) {
       break;
     }
+
+    var number = i+1 < n && sfen[i+1] != ' ' && parseInt(sfen.substring(i+1, n));
+
+    if (number) {
+      p = p.toLowerCase()
+      for(var k=0; k<number; k++) {
+        editor.senteHand.push(p);
+      }
+
+      i += String(number).length;
+    }
     else {
       editor.senteHand.push(p.toLowerCase());
-      i++;
     }
+
+    i++;
   }
 
   return i;
@@ -419,12 +426,14 @@ function constructGoteHand(sfen, i) {
       break;
     }
 
-    if (!(Piece[p.toLowerCase()] || parseInt(p))) {
+    if (!Piece[p.toLowerCase()]) {
+      console.log("Error: this is not a piece", p);
       i++;
       continue;
     }
 
-    number = parseInt(sfen.substring(i, n));
+    var number = i+1 < n && sfen[i+1] != ' ' && parseInt(sfen.substring(i+1, n));
+
     if (number) {
       for(var k=0; k<number; k++)
         editor.goteHand.push(p);
@@ -432,8 +441,9 @@ function constructGoteHand(sfen, i) {
     }
     else {
       editor.goteHand.push(p);
-      i++;
     }
+
+    i++;
   }
 
   return i;
@@ -487,6 +497,12 @@ function constructBan(sfen) {
 
   i = constructSenteHand(sfen, i);
   i = constructGoteHand(sfen, i);
+
+  if (sfenEditorJs.debug) {
+    console.log('BanFromText', editor.ban);
+    console.log('SenteHand', editor.senteHand);
+    console.log('GoteHand', editor.goteHand);
+  }
 }
 
 /*
