@@ -37,64 +37,38 @@ function main() {
   loadDefaultCSS(defaultCSS);
 
   function eventWindowLoaded() {
-    //setupKyokumens();
-    //setupMoves();
     setup(document.body, null);
   }
 
-  /**
-   * Find all tags with class='kyokumen' and create kyokumens
-   */
-  function setupKyokumens() {
-    var figs = document.getElementsByClassName('kyokumen');
-
-    var n = figs.length;
-    for (var i = 0; i < n; i++) {
-      kyokumen = createKyokumen(figs[i]);
-      kyokumen.svg.addEventListener('click', kyokumen.reset, false);
-    }
-  }
-
-  /**
-   * Find all tags with class='mv' and attach event listener
-   */
-  function setupMoves() {
-    var moves = document.getElementsByClassName('mv');
-
-    var n = moves.length;
-    for (var i = 0; i < moves.length; i++) {
-      var mv = createMv(moves[i]);
-      moves[i].addEventListener('mouseover', mv.draw, false);
-    }
-  }
 
   /**
    * Traverse DOM and setup kyokumen and moves
    */
   function setup(node, fig) {
-    if(node.children.nodeType === 1)
+    if (node.children.nodeType === 1)
       return fig;
 
-    if(node.className === 'kyokumen') {
+    if (node.className === 'kyokumen') {
       fig = node;
       kyokumen = createKyokumen(fig);
       kyokumen.svg.addEventListener('click', kyokumen.reset, false);
     }
-    else if(node.className === 'mv') {
+    else if (node.className === 'mv') {
       var mv = createMv(node, fig);
-      if(mv)
+      if (mv)
         node.addEventListener('mouseover', mv.draw, false);
       else
         console.log('Error: unable to create mv in tab', mv);
     }
     else {
-      for(var i=0; i<node.children.length; i++)
+      for (var i = 0; i < node.children.length; i++)
         fig = setup(node.children[i], fig);
     }
 
     return fig;
   }
 }
+
 
 /**
  * kyokumen object constructor
@@ -117,23 +91,24 @@ function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
     clearKyokumen(svg, 'sente');
     clearKyokumen(svg, 'gote');
     clearKyokumen(svg, 'title');
-  }
+  };
 
   this.draw = function(sfen, sente, gote, title) {
-    sfen  = sfen  || _this.sfen;
+    sfen = sfen || _this.sfen;
     sente = sente || _this.sente;
-    gote  = gote  || _this.gote;
+    gote = gote || _this.gote;
     title = title || _this.title;
 
     _this.clear();
     drawTitle(_this, title);
     drawPieces(_this, sfen, sente, gote);
-  }
+  };
 
   this.reset = function() {
     _this.draw();
-  }
+  };
 }
+
 
 /*
  * Create a kyokumen object from fig = <figure class="kyokumen" sfen="...">
@@ -147,13 +122,13 @@ function createKyokumen(fig) {
   const gote = fig.getAttribute('data-gote');
   const title = fig.getAttribute('data-title');
   // sente, gote can be falsy, default will be used.
-    
+
   svg.style.width = String(width + margin[1] + margin[3]) + 'px';
   svg.style.height = String(width + margin[0] + margin[2]) + 'px';
   svg.style.padding = '0';
-  
+
   kyokumen = new Kyokumen(svg, width, margin, sfen, sente, gote, title);
-  kyokumen.draw()
+  kyokumen.draw();
 
   drawBan(svg, width, margin);        // Box and lines
   drawNumbersCol(svg, width, margin); // Axis label ９、８、･･･、１
@@ -164,6 +139,7 @@ function createKyokumen(fig) {
 
   return kyokumen;
 }
+
 
 /**
  * mv object constructor
@@ -179,8 +155,9 @@ function Mv(kyokumen, sfen, sente, gote, title) {
 
   this.draw = function() {
     _this.kyokumen.draw(_this.sfen, _this.sente, _this.gote, _this.title);
-  }
+  };
 }
+
 
 /*
  * Create a mv object from e = <span class="mv" data-sfen="..." ...>
@@ -198,16 +175,13 @@ function createMv(e, fig) {
   }
 
   var sente = e.getAttribute('data-sente') || fig.getAttribute('data-sente');
-  var gote  = e.getAttribute('data-gote')  || fig.getAttribute('data-gote');
+  var gote = e.getAttribute('data-gote') || fig.getAttribute('data-gote');
   var title = e.getAttribute('data-title') || fig.getAttribute('data-title');
-
-  //var svg = kyokumen.svg;
 
   mv = new Mv(kyokumen, sfen, sente, gote, title);
 
   return mv;
 }
-
 
 
 /**
@@ -254,13 +228,15 @@ function getWidth(fig, svg) {
   return width;
 }
 
+
 function getPadding(fig, svg) {
   /**
-   * Return an array of [padding-top, padding-right, padding-bottom, padding-top]
+   * Return an array of
+   * [padding-top, padding-right, padding-bottom, padding-top]
    */
 
   var omargin = fig.getAttribute('data-padding');
-    
+
   if (omargin) {
     return omargin.split(',').map(Number);
   }
@@ -269,7 +245,7 @@ function getPadding(fig, svg) {
 
   var margin = [0, 0, 0, 0];
 
-  style = document.defaultView.getComputedStyle(svg, null)
+  style = document.defaultView.getComputedStyle(svg, null);
 
   margin[0] = parseFloat(style.paddingTop);
   margin[1] = parseFloat(style.paddingRight);
@@ -278,7 +254,6 @@ function getPadding(fig, svg) {
 
   return margin;
 }
-
 
 
 /**
@@ -318,6 +293,7 @@ function drawBan(svg, width, margin) {
   }
 }
 
+
 /**
  *  Draw 9 ... 1 on top magin
  */
@@ -331,7 +307,7 @@ function drawNumbersCol(svg, width, margin) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
     num.setAttribute('x', margin[3] + w * (i + 0.5));
-    num.setAttribute('y', margin[0] - w*offsetNumCol);
+    num.setAttribute('y', margin[0] - w * offsetNumCol);
 
 
     num.setAttribute('text-anchor', 'middle');
@@ -341,6 +317,7 @@ function drawNumbersCol(svg, width, margin) {
     svg.appendChild(num);
   }
 }
+
 
 /**
  *  Draw 一、二、･･･、九 on left margin
@@ -352,7 +329,7 @@ function drawNumbersRow(svg, width, margin) {
   for (var i = 0; i < nrow; i++) {
     var num = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     num.setAttribute('class', 'num');
-    num.setAttribute('x', margin[3] + width + w*offsetNumRow);
+    num.setAttribute('x', margin[3] + width + w * offsetNumRow);
     num.setAttribute('y', margin[0] + w * (i + 0.5));
 
     num.setAttribute('text-anchor', 'middle');
@@ -362,6 +339,7 @@ function drawNumbersRow(svg, width, margin) {
     svg.appendChild(num);
   }
 }
+
 
 /**
  * Parse sfen string and draw pieces
@@ -519,7 +497,7 @@ function skipTeban(sfen, i) {
       i++;
     }
     else {
-      console.log('Error: teban b or w not found')
+      console.log('Error: teban b or w not found');
     }
   }
 
@@ -532,7 +510,7 @@ function skipTeban(sfen, i) {
  * Draw <svg sente='☗先手'> atrribute with Sente's pieces in hand.
  */
 function drawSente(svg, width, margin, sfen, sente, i) {
-  const w = width/nrow;
+  const w = width / nrow;
   var n = sfen.length;
 
   if (!sente)
@@ -547,8 +525,7 @@ function drawSente(svg, width, margin, sfen, sente, i) {
 
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'sente');
-  label.setAttribute('x', margin[3] + width + w + (margin[1] - w)/2);
-  //label.setAttribute('x', margin[1] + (1 + 1.5 / nrow) * width + 4);
+  label.setAttribute('x', margin[3] + width + w + (margin[1] - w) / 2);
   label.setAttribute('y', margin[0]);
   label.setAttribute('dominant-baseline', 'central');
   var text = document.createTextNode(sente);
@@ -558,25 +535,24 @@ function drawSente(svg, width, margin, sfen, sente, i) {
   var iPiece = 0;
   while (i < n) {
     var p = sfen.charAt(i);
-    if(p === '-' || p === ' ')
+    if (p === '-' || p === ' ')
       break;
 
     number = parseInt(sfen.substring(i, n));
     if (number) {
-      if(pPrev && number < kyokumenJs.maxDuplicate) {
-        for(var j=1; j<number; j++) {}
+      if (pPrev && number < kyokumenJs.maxDuplicate) {
+        for (var j = 1; j < number; j++) {
           var pt = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
           pt.appendChild(document.createTextNode(Piece[pPrev.toLowerCase()]));
           pt.setAttribute('class', 'sente-piece-hand');
           pt.setAttribute('data-i', iPiece);
           pt.setAttribute('data-p', pPrev.toLowerCase());
           label.appendChild(pt);
-          //sente += Piece[pPrev.toLowerCase()]
+        }
       }
-      else if(pPrev) {
+      else if (pPrev) {
         label.appendChild(document.createTextNode(numKanji[number - 1]));
         iPiece += number - 1;
-        //sente += numKanji[number - 1];
       }
       i += String(number).length;
     }
@@ -591,7 +567,6 @@ function drawSente(svg, width, margin, sfen, sente, i) {
       pt.setAttribute('data-p', p.toLowerCase());
 
       label.appendChild(pt);
-      //sente += Piece[p.toLowerCase()];
       i++;
       iPiece++;
     }
@@ -621,7 +596,7 @@ function drawGote(svg, width, margin, sfen, gote, i) {
 
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'gote');
-  label.setAttribute('x', margin[3]/2);
+  label.setAttribute('x', margin[3] / 2);
   label.setAttribute('y', margin[0]);
   label.setAttribute('dominant-baseline', 'central');
   label.appendChild(komark);
@@ -641,20 +616,18 @@ function drawGote(svg, width, margin, sfen, gote, i) {
 
     number = parseInt(sfen.substring(i, n));
     if (number) {
-      if(pPrev && number < kyokumenJs.maxDuplicate) {
-        for(var j=1; j<number; j++) {
+      if (pPrev && number < kyokumenJs.maxDuplicate) {
+        for (var j = 1; j < number; j++) {
           var pt = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
           pt.appendChild(document.createTextNode(Piece[pPrev.toLowerCase()]));
           pt.setAttribute('class', 'gote-piece-hand');
           pt.setAttribute('data-i', iPiece);
           pt.setAttribute('data-p', pPrev.toLowerCase());
-          //var pt = document.createTextNode(gote);
-          //gote += Piece[pPrev.toLowerCase()]
           label.appendChild(pt);
           iPiece++;
         }
       }
-      else if(pPrev) {
+      else if (pPrev) {
         label.appendChild(document.createTextNode(numKanji[number - 1]));
         iPiece += number - 1;
       }
@@ -691,8 +664,8 @@ function drawTitle(kyokumen, title) {
 
     var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('class', 'title');
-    label.setAttribute('x', margin[3] + width/2);
-    label.setAttribute('y', (margin[0] - w)/2);
+    label.setAttribute('x', margin[3] + width / 2);
+    label.setAttribute('y', (margin[0] - w) / 2);
     label.setAttribute('text-anchor', 'middle');
     label.setAttribute('dominant-baseline', 'central');
 
@@ -718,7 +691,7 @@ function clearKyokumen(svg, cls) {
 
 /**
   * Return <figure class="kyokumen"> object -- kyokumenFig
-  * When o is a class="mv", return the kyokumenFig specified by the 'data-board' attr
+  * When o is a class="mv", return the kyokumenFig specified by the 'data-board'
   * When o is itself a figure opject return o.
   */
 function getFig(o) {
@@ -726,7 +699,7 @@ function getFig(o) {
     return o;
 
   var boardid = o.getAttribute('data-board');
-  if(!boardid)
+  if (!boardid)
     return undefined;
 
   var kyokumenFig = document.getElementById(boardid);
@@ -743,17 +716,17 @@ function loadDefaultCSS(filename)
 {
   var link = document.createElement('link');
   link.href = filename;
-  link.type = "text/css";
-  link.rel = "stylesheet";
+  link.type = 'text/css';
+  link.rel = 'stylesheet';
 
   head = document.getElementsByTagName('head')[0];
 
   firstlink = head.getElementsByTagName('link')[0];
   if (firstlink) {
-    head.insertBefore(link, firstlink)
+    head.insertBefore(link, firstlink);
   }
   else {
-    head.appendChild(link); 
+    head.appendChild(link);
   }
 }
 
