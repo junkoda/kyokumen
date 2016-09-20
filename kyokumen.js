@@ -11,7 +11,10 @@ kyokumenJs = {
   ver: '0',
   senteMark: '☗',
   goteMark: '☖',
-  maxDuplicate: 3
+  maxDuplicate: 3,
+  handOffset: 0.1,
+  offsetNumCol: 0.26,
+  offsetNumRow: 0.55,
 };
 
 (function () {
@@ -526,7 +529,8 @@ function drawSente(svg, width, margin, sfen, sente, i) {
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'sente');
   label.setAttribute('x', margin[3] + width + w + (margin[1] - w) / 2);
-  label.setAttribute('y', margin[0]);
+  label.setAttribute('y', margin[0] + width - kyokumenJs.handOffset*w);
+  label.setAttribute('text-anchor', 'end');
   label.setAttribute('dominant-baseline', 'central');
   var text = document.createTextNode(sente);
   label.appendChild(komark);
@@ -594,11 +598,16 @@ function drawGote(svg, width, margin, sfen, gote, i) {
   komark.setAttribute('class', 'komark');
   komark.appendChild(document.createTextNode(kyokumenJs.goteMark));
 
+  const x = margin[3] / 2
+  const y = margin[0];
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'gote');
-  label.setAttribute('x', margin[3] / 2);
-  label.setAttribute('y', margin[0]);
+  label.setAttribute('x', x);
+  label.setAttribute('y', y);
   label.setAttribute('dominant-baseline', 'central');
+  label.setAttribute('text-anchor', 'end');
+  var transformation = 'rotate(180 ' + x.toString() + ' ' + y.toString() + ')';
+  label.setAttribute('transform', transformation);
   label.appendChild(komark);
 
   var text = document.createTextNode(gote);
@@ -635,7 +644,6 @@ function drawGote(svg, width, margin, sfen, gote, i) {
       i += String(number).length;
     }
     else {
-      //gote += Piece[p.toLowerCase()];
       var pt = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
       pt.appendChild(document.createTextNode(Piece[p.toLowerCase()]));
       pt.setAttribute('class', 'gote-piece-hand');
