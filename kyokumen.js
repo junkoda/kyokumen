@@ -17,7 +17,7 @@ kyokumenJs = {
   offsetNumRow: 0.55,
 };
 
-(function () {
+(function () { 
 const nrow = 9;
 const Piece = { l:'香', n:'桂', s:'銀', g:'金', k:'玉', r:'飛', b:'角', p:'歩', '+l':'成香', '+n':'成桂', '+s':'成銀', '+r':'龍', '+b':'馬', '+p':'と'};
 const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八'];
@@ -78,7 +78,7 @@ function main() {
  */
 function parseCoordinate(s)
 {
-  if(typeof s === 'string') {
+  if (typeof s === 'string') {
     if (s.length != 2) {
       console.log('Error: data-made must have two integers', s);
       return null;
@@ -86,7 +86,7 @@ function parseCoordinate(s)
     const ix = parseInt(s[0]);
     const iy = parseInt(s[1]);
 
-    if(ix && iy) return [ix, iy];
+    if (ix && iy) return [ix, iy];
   }
 
   return null;
@@ -94,7 +94,6 @@ function parseCoordinate(s)
 
 /**
  * kyokumen object constructor
- * 
  */
 function Kyokumen(svg, width, margin, sfen, sente, gote, title, focus) {
   var _this = this;
@@ -118,7 +117,7 @@ function Kyokumen(svg, width, margin, sfen, sente, gote, title, focus) {
   };
 
   this.draw = function(sfen, sente, gote, title, focus) {
-    if(sfen == undefined) {
+    if (sfen == undefined) {
       sfen = sfen || _this.sfen;
       sente = sente || _this.sente;
       gote = gote || _this.gote;
@@ -411,7 +410,7 @@ function drawPieces(kyokumen, sfen, sente, gote, focus) {
       break;
     }
     else {
-      const emp = focus && focus[0] == 9 - ix && focus[1] == 1 + iy
+      const emp = focus && focus[0] == 9 - ix && focus[1] == 1 + iy;
       drawPiece(svg, margin, w, ix, iy, p, emp);
       ix++;
     }
@@ -477,7 +476,7 @@ function drawPiece(svg, margin, w, ix, iy, p, emp) {
     var text;
 
     if (emp) {
-      var text = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      text = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
       text.setAttribute('class', 'made');
       text.appendChild(document.createTextNode(pieceText));
     }
@@ -560,7 +559,7 @@ function drawSente(svg, width, margin, sfen, sente, i) {
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'sente');
   label.setAttribute('x', margin[3] + width + w + (margin[1] - w) / 2);
-  label.setAttribute('y', margin[0] + width - kyokumenJs.handOffset*w);
+  label.setAttribute('y', margin[0] + width - kyokumenJs.handOffset * w);
   label.setAttribute('text-anchor', 'end');
   label.setAttribute('dominant-baseline', 'central');
   var text = document.createTextNode(sente);
@@ -629,7 +628,7 @@ function drawGote(svg, width, margin, sfen, gote, i) {
   komark.setAttribute('class', 'komark');
   komark.appendChild(document.createTextNode(kyokumenJs.goteMark));
 
-  const x = margin[3] / 2
+  const x = margin[3] / 2;
   const y = margin[0];
   var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('class', 'gote');
