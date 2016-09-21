@@ -72,11 +72,31 @@ function main() {
   }
 }
 
+/**
+ * s (str): string of two numbers '12'
+ * Returns: array [1, 2]
+ */
+function parseCoordinate(s)
+{
+  if(typeof s === 'string') {
+    if (s.length != 2) {
+      console.log('Error: data-made must have two integers', s);
+      return null;
+    }
+    const ix = parseInt(s[0]);
+    const iy = parseInt(s[1]);
+
+    if(ix && iy) return [ix, iy];
+  }
+
+  return null;
+}
 
 /**
  * kyokumen object constructor
+ * 
  */
-function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
+function Kyokumen(svg, width, margin, sfen, sente, gote, title, focus) {
   var _this = this;
 
   this.svg = svg;
@@ -86,6 +106,7 @@ function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
   this.sente = sente;
   this.gote = gote;
   this.title = title;
+  this.focus = parseCoordinate(focus);
 
   this.clear = function() {
     svg = _this.svg;
@@ -96,15 +117,18 @@ function Kyokumen(svg, width, margin, sfen, sente, gote, title) {
     clearKyokumen(svg, 'title');
   };
 
-  this.draw = function(sfen, sente, gote, title) {
-    sfen = sfen || _this.sfen;
-    sente = sente || _this.sente;
-    gote = gote || _this.gote;
-    title = title || _this.title;
+  this.draw = function(sfen, sente, gote, title, focus) {
+    if(sfen == undefined) {
+      sfen = sfen || _this.sfen;
+      sente = sente || _this.sente;
+      gote = gote || _this.gote;
+      title = title || _this.title;
+      focus = focus || _this.focus;
+    }
 
     _this.clear();
     drawTitle(_this, title);
-    drawPieces(_this, sfen, sente, gote);
+    drawPieces(_this, sfen, sente, gote, focus);
   };
 
   this.reset = function() {
@@ -124,20 +148,21 @@ function createKyokumen(fig) {
   const sente = fig.getAttribute('data-sente');
   const gote = fig.getAttribute('data-gote');
   const title = fig.getAttribute('data-title');
+  const focus = fig.getAttribute('data-made');
   // sente, gote can be falsy, default will be used.
 
   svg.style.width = String(width + margin[1] + margin[3]) + 'px';
   svg.style.height = String(width + margin[0] + margin[2]) + 'px';
   svg.style.padding = '0';
 
-  kyokumen = new Kyokumen(svg, width, margin, sfen, sente, gote, title);
-  kyokumen.draw();
+  kyokumen = new Kyokumen(svg, width, margin, sfen, sente, gote, title, focus);
+
 
   drawBan(svg, width, margin);        // Box and lines
   drawNumbersCol(svg, width, margin); // Axis label ９、８、･･･、１
   drawNumbersRow(svg, width, margin); // Axis label 一、二、･･･、九
-  drawPieces(kyokumen, sfen, sente, gote, title);
 
+  kyokumen.draw();
   fig.kyokumen = kyokumen;
 
   return kyokumen;
@@ -147,7 +172,7 @@ function createKyokumen(fig) {
 /**
  * mv object constructor
  */
-function Mv(kyokumen, sfen, sente, gote, title) {
+function Mv(kyokumen, sfen, sente, gote, title, focus) {
   var _this = this;
 
   this.kyokumen = kyokumen;
@@ -155,9 +180,10 @@ function Mv(kyokumen, sfen, sente, gote, title) {
   this.sente = sente;
   this.gote = gote;
   this.title = title;
+  this.focus = parseCoordinate(focus);
 
   this.draw = function() {
-    _this.kyokumen.draw(_this.sfen, _this.sente, _this.gote, _this.title);
+    _this.kyokumen.draw(_this.sfen, _this.sente, _this.gote, _this.title, _this.focus);
   };
 }
 
@@ -177,11 +203,12 @@ function createMv(e, fig) {
     console.log(e);
   }
 
-  var sente = e.getAttribute('data-sente') || fig.getAttribute('data-sente');
-  var gote = e.getAttribute('data-gote') || fig.getAttribute('data-gote');
-  var title = e.getAttribute('data-title') || fig.getAttribute('data-title');
+  const sente = e.getAttribute('data-sente') || fig.getAttribute('data-sente');
+  const gote = e.getAttribute('data-gote') || fig.getAttribute('data-gote');
+  const title = e.getAttribute('data-title') || fig.getAttribute('data-title');
+  const focus = e.getAttribute('data-made');
 
-  mv = new Mv(kyokumen, sfen, sente, gote, title);
+  mv = new Mv(kyokumen, sfen, sente, gote, title, focus);
 
   return mv;
 }
@@ -346,17 +373,11 @@ function drawNumbersRow(svg, width, margin) {
 
 /**
  * Parse sfen string and draw pieces
+ * focus: array of two integers constructed from data-made
  */
-function drawPieces(kyokumen, sfen, sente, gote) {
+function drawPieces(kyokumen, sfen, sente, gote, focus) {
   // e.g. sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b'>
   // for example for initial
-
-  /*
-  kyokumen.sfen = sfen;
-  if(sente) kyokumen.sente = sente;
-  if(gote) kyokumen.gote = gote;
-  if(title) kyokumen.title = title;
-  */
 
   var svg = kyokumen.svg;
   const width = kyokumen.width;
@@ -390,7 +411,8 @@ function drawPieces(kyokumen, sfen, sente, gote) {
       break;
     }
     else {
-      drawPiece(svg, margin, w, ix, iy, p);
+      const emp = focus && focus[0] == 9 - ix && focus[1] == 1 + iy
+      drawPiece(svg, margin, w, ix, iy, p, emp);
       ix++;
     }
   }
@@ -406,12 +428,13 @@ function drawPieces(kyokumen, sfen, sente, gote) {
 /**
  * Draw one piece
  * Args:
- *       w:  width / nrow
- *       ix: 0...9, column index
- *       iy: 0...9, row index
- *       p:  sfen character 'p', 'P', ..., or promoted '+p', '+P', ..
+ *       w:   width / nrow
+ *       ix:  0...9, column index
+ *       iy:  0...9, row index
+ *       p:   sfen character 'p', 'P', ..., or promoted '+p', '+P', ..
+ *       emp: emphasise this piece or not (bool)
  */
-function drawPiece(svg, margin, w, ix, iy, p) {
+function drawPiece(svg, margin, w, ix, iy, p, emp) {
   var pieceText = Piece[p.toLowerCase()];
 
   if (pieceText) {
@@ -451,7 +474,15 @@ function drawPiece(svg, margin, w, ix, iy, p) {
 
     piece.setAttribute('text-anchor', 'middle');
     piece.setAttribute('dominant-baseline', 'central');
-    var text = document.createTextNode(pieceText);
+    var text;
+
+    if (emp) {
+      var text = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      text.setAttribute('class', 'made');
+      text.appendChild(document.createTextNode(pieceText));
+    }
+    else
+      text = document.createTextNode(pieceText);
 
     piece.appendChild(text);
     svg.appendChild(piece);

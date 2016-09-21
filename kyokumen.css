@@ -38,6 +38,10 @@ svg.kyokumen-svg .title {
     font-size: 15px;
 }
 
+svg.kyokumen-svg .made {
+    font-weight: bold;
+}
+
 span.mv:hover {
     text-decoration: underline;
 }
