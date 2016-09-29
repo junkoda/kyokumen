@@ -15,7 +15,6 @@ def piece_rank(p):
 def piece_raw(p):
     return p.lower()[-1]
 
-
 class Ban:
     def __init__(self, teai):
         self.hand = [[], []]
@@ -113,8 +112,11 @@ class Kif:
 
     def __iter__(self):
         for line in self.f:
+            if line[0] == '#' or line[0] == '*':
+                continue;
             #print(line)
-            v = line.rstrip().split(' ')
+
+            v = line.strip().split(' ')
             n = int(v[0])
             mv = v[1]
 
@@ -126,12 +128,14 @@ class Kif:
             if mv[0] == '同':
                 dest = self.dest
                 i += 1
+                if mv[i] == '\u3000':
+                    i += 1
+
             else:
                 ix = 9 - NumZenkaku[mv[0]]
                 iy = NumKanji[mv[1]] - 1
                 assert 0 <= ix and ix < 9
                 assert 0 <= iy and ix < 9
-                #print('Error: unable to parse', mv, ix, iy)
                 dest = (ix, iy)
                 i += 2
 
