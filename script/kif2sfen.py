@@ -144,7 +144,11 @@ class Kif:
                 i += 2
 
             # piece
-            p = Piece[mv[i]]
+            p = ''
+            if mv[i] == '成': # 成銀、成桂、成香
+                p = '+'
+                i += 1
+            p += Piece[mv[i]]
             i += 1
 
             #
