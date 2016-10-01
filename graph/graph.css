@@ -1,0 +1,45 @@
+    
+svg.graph {
+    font-size: 18px;
+    display: block;
+    font-family: sans-serif;
+}
+
+svg.graph .ban {
+    stroke-width: 3;
+    stroke: #000;
+    fill: #FFF;
+}
+
+svg.graph .sen {
+    stroke-width: 1;
+    stroke: #000;
+}
+
+svg.graph .koma, .nari-goma, .sente, .gote {
+    writing-mode: tb; /* 縦書き */
+}
+
+svg.graph .komark {
+    glyph-orientation-vertical: 0;
+}
+
+svg.graph .num {
+    font-size: 15px;
+}
+
+svg.graph .nari-goma {
+    fill: #D00;
+}
+
+svg.graph .title {
+    font-size: 15px;
+}
+
+svg.graph .made {
+    font-weight: bold;
+}
+
+span.mv:hover {
+    text-decoration: underline;
+}

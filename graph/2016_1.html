@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="graph.css">
+  <title>局面グラフ 2016年度</title>
+  <style>
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+  fill: black;
+}
+
+</style>
+</head>
+<body>
+
+<svg id="canvas1" class="graph" width="1280" height="600"></svg>
+
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../kyokumen.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+var s = document.getElementById("canvas1");
+
+
+kyokumen = new kyokumenJs.Kyokumen(s, 200, [43, 48, 26, 35])
+kyokumen.draw()
+
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+var simulation = d3.forceSimulation()
+    .velocityDecay(0.01)
+    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+    .force("charge", d3.forceManyBody())
+    .alphaTarget(0.1);
+    
+
+d3.json("graph_2016a_1.json", function(error, graph) {
+  if (error) throw error;
+
+  console.log(graph);
+
+  var link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("stroke-width", function(d) { return 1; });
+
+  var node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(graph.nodes)
+                .enter().append("circle")
+                .attr("r", function(d) { return 1 + 2*Math.sqrt(d.vol)})
+                .call(d3.drag().on("start", dragstarted)
+                               .on("drag", dragged)
+                               .on("end", dragended))
+                .on("mouseover", mouseoverNode)
+                ;
+
+
+  node.append("title")
+      .text(function(d) { return d.id; });
+
+  simulation.nodes(graph.nodes)
+            .on("tick", ticked);
+  
+
+  // Fix initial state
+  node0 = simulation.nodes().find(function (e) {return e.id === 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1'})
+
+  node0.fx = 500;
+  node0.fy = 400;
+
+  // link spring
+  simulation.force("link")
+            .links(graph.links)
+            .distance(function(){ return 10;})
+            .strength(function(){ return 2; })
+            
+  
+  simulation.force("charge")
+            .strength(function() { return -0.1; })
+
+  function ticked() {
+    link
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+  }
+
+  function dragstarted(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+
+  function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.01);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  function mouseoverNode(e) {
+    kyokumen.draw(e.id)
+  }
+});
+
+
+
+</script>
+</body>
