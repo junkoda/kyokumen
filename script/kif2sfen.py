@@ -4,7 +4,7 @@ nrow = 9
 
 Turn = ['b', 'w']
 Koma = ['☗', '☖']
-Piece = {'玉': 'k', '飛':'r', '角':'b', '金':'g', '銀':'s', '桂':'n', '香':'l', '歩':'p', '竜':'+r', '馬':'+b', '圭':'+n', '杏':'+l', 'と':'+p'}
+Piece = {'玉': 'k', '飛':'r', '角':'b', '金':'g', '銀':'s', '桂':'n', '香':'l', '歩':'p', '竜':'+r', '龍':'+r', '馬':'+b', '圭':'+n', '杏':'+l', 'と':'+p'}
 PieceRank = {'o': 0, 'k': 1, 'r': 2, 'b': 3, 'g': 4, 's': 5, 'n':6, 'l':7, 'p':8 }
 NumKanji = {'一': 1, '二': 2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9}
 NumZenkaku = {'１': 1, '２': 2, '３':3, '４':4, '５':5, '６':6, '７':7, '８':8, '９':9}
@@ -43,7 +43,7 @@ class Ban:
         return self.ban[i]
 
     def __repr__(self):
-        return "Ban " + self.sfen
+        return "Ban " + self.sfen()
 
 
     def __setitem__(self, key, value):
@@ -82,11 +82,12 @@ class Ban:
         self.made = str(9 - dest[0]) + str(dest[1] + 1)
 
 
-    @property
-    def sfen(self):
+    def sfen(self, **kwargs):
         """return SFEN representation"""
         s = sfen_board(self.ban)
         s += ' ' + self.teban + ' '
+
+        num = kwargs.get('num', None)
 
         if self.hand[0] or self.hand[1]:
             s += sfen_hand(self.hand[0]).upper()
@@ -94,8 +95,10 @@ class Ban:
         else:
             s += '-'
 
-
-        s += ' ' + str(self.n)
+        if num is None:
+            s += ' ' + str(self.n)
+        else:
+            s += ' ' + str(num)
         
         return s
 
@@ -107,10 +110,11 @@ class Kif:
         self.f = open(filename)
         self.header = read_header(self.f)
         self.ban = Ban(self.header['手合割'])
-        #self.r = re.compile('\w+') #([一二三四五六七八九])')
         self.dest = None
 
     def __iter__(self):
+        yield (0, '初期盤面', self.ban)
+
         for line in self.f:
             if line[0] == '#' or line[0] == '*':
                 continue;
@@ -241,7 +245,7 @@ def main():
 
     filename = sys.argv[-1]
     for i,mv,b in Kif(filename):
-        print('<span class="mv" data-made="' + b.made + '" data-sfen="' + b.sfen + '">' + mv + '</span>')
+        print('<span class="mv" data-made="' + b.made + '" data-sfen="' + b.sfen() + '">' + mv + '</span>')
 
 if __name__ == "__main__":
     main()

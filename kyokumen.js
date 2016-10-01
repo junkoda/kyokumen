@@ -26,6 +26,18 @@ const numKanji = ['一', '二', '三', '四', '五', '六', '七', '八', '九',
  * API of kyokumen.js usable by other codes
  */
 kyokumenJs.createKyokumen = createKyokumen; // create a kyokumen in figure
+kyokumenJs.Kyokumen = function(svg, width, margin) {
+  kyokumen = new Kyokumen(svg, width, margin, '')
+
+  drawBan(svg, width, margin);        // Box and lines
+  drawNumbersCol(svg, width, margin); // Axis label ９、８、･･･、１
+  drawNumbersRow(svg, width, margin); // Axis label 一、二、･･･、九
+
+  kyokumen.draw();
+
+  return kyokumen;
+};
+
 
 
 /*
@@ -143,7 +155,7 @@ function createKyokumen(fig) {
   var svg = createKyokumenSvg(fig);
   const width = getWidth(fig, svg);
   const margin = getPadding(fig, svg);
-  const sfen = fig.getAttribute('data-sfen');
+  const sfen = fig.getAttribute('data-sfen') || '';
   const sente = fig.getAttribute('data-sente');
   const gote = fig.getAttribute('data-gote');
   const title = fig.getAttribute('data-title');
