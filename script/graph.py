@@ -3,13 +3,12 @@ import glob
 import json
 import kif2sfen as k
 
-vertices = defaultdict(int)
-edges = set()
+vertices = defaultdict(int) # verteces[kyokumen] = number of games
+edges = set()               # set of all moves
 
 
 def read(filename):
-    print(filename)
-    sfen_prev = None #'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b 1'
+    sfen_prev = None
     vertices[sfen_prev] += 1
 
     for i,mv,b in k.Kif(filename):
@@ -22,14 +21,17 @@ def read(filename):
 for filename in glob.glob('../data/*/*.kif'):
     read(filename)
 
-nodes = []
+nodes = []          # output nodes
+links = []          # output links
 node_set = set()
-links = []
+
 
 #for sfen, n in vertices.items():
 #   if n > 1:
 #        nodes.append({'id': sfen, 'group':1, ''})
         #print(sfen, n)
+
+search_verte
 
 for e in edges:
     if vertices[e[0]] > 1 or vertices[e[1]] > 1:
