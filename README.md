@@ -61,7 +61,7 @@ editor/editor.js
 
 - script/kif2sfen.py
 
-kif ファイルから SFEN を生成します。
+kif ファイルから SFEN を生成。
 
 
 
